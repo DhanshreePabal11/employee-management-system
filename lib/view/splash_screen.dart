@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'dashboard_screen.dart';
+// import 'dashboard_screen.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {

@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'add_employee_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -18,7 +18,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-
       appBar: AppBar(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
@@ -165,11 +164,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Icons.person_add_alt_1,
                     Colors.blue,
                     () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Add Employee screen coming next!',
-                          ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const AddEmployeeScreen(),
                         ),
                       );
                     },
