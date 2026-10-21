@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'add_employee_screen.dart';
 
@@ -18,6 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+
       appBar: AppBar(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
@@ -156,14 +158,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             const SizedBox(height: 14),
 
+            // Add Employee and View Employees buttons
             Row(
               children: [
                 Expanded(
-                  child: actionCard(
-                    'Add Employee',
-                    Icons.person_add_alt_1,
-                    Colors.blue,
-                    () {
+                  child: ElevatedButton.icon(
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -172,15 +172,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       );
                     },
+                    icon: const Icon(Icons.person_add_alt_1),
+                    label: const Text('Add Employee'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
-                  child: actionCard(
-                    'View Employees',
-                    Icons.people_outline,
-                    Colors.purple,
-                    () {
+                  child: ElevatedButton.icon(
+                    onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -189,6 +201,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       );
                     },
+                    icon: const Icon(Icons.people_outline),
+                    label: const Text('View Employees'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: primaryColor,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -260,6 +285,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         unselectedItemColor: Colors.grey,
         selectedFontSize: 12,
         unselectedFontSize: 12,
+
         onTap: (index) {
           setState(() {
             selectedIndex = index;
@@ -273,13 +299,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     'Dashboard',
                     'Employees',
                     'Attendance',
-                    'Profile'
+                    'Profile',
                   ][index]} screen coming next!',
                 ),
               ),
             );
           }
         },
+
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
@@ -352,46 +379,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget actionCard(
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: 20,
-          horizontal: 12,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: 30,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
