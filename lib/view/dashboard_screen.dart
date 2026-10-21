@@ -1,24 +1,66 @@
 
 import 'package:flutter/material.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int selectedIndex = 0;
+
+  final Color primaryColor = const Color(0xFF172554);
+  final Color backgroundColor = const Color(0xFFF5F7FB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: backgroundColor,
 
       appBar: AppBar(
-        title: const Text(
-          'Employee Dashboard',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Employee Portal',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Management Dashboard',
+              style: TextStyle(fontSize: 12),
+            ),
+          ],
         ),
-        backgroundColor: const Color(0xFF172554),
-        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No new notifications'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.notifications_none),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Icon(
+                Icons.person,
+                color: Color(0xFF172554),
+              ),
+            ),
+          ),
+        ],
       ),
 
       body: SingleChildScrollView(
@@ -27,41 +69,51 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Welcome!',
+              'Good Morning, Dhanshree!',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 23,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF172554),
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             const Text(
-              'Here is your workforce overview.',
+              'Here is what is happening in your workplace today.',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 13,
                 color: Colors.grey,
               ),
             ),
 
             const SizedBox(height: 24),
 
+            const Text(
+              'Workforce Overview',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
             Row(
               children: [
                 Expanded(
-                  child: employeeCard(
+                  child: summaryCard(
                     'Total Employees',
-                    '25',
-                    Icons.groups,
+                    '128',
+                    Icons.groups_rounded,
                     Colors.blue,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: employeeCard(
+                  child: summaryCard(
                     'Present Today',
-                    '20',
+                    '112',
                     Icons.check_circle_outline,
                     Colors.green,
                   ),
@@ -74,19 +126,19 @@ class DashboardScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: employeeCard(
+                  child: summaryCard(
                     'On Leave',
-                    '5',
-                    Icons.event_busy,
+                    '8',
+                    Icons.event_busy_outlined,
                     Colors.orange,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: employeeCard(
+                  child: summaryCard(
                     'Departments',
-                    '4',
-                    Icons.business,
+                    '6',
+                    Icons.business_outlined,
                     Colors.purple,
                   ),
                 ),
@@ -98,76 +150,163 @@ class DashboardScreen extends StatelessWidget {
             const Text(
               'Quick Actions',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF172554),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Add Employee feature coming next!'),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.person_add_alt_1),
-                label: const Text('Add Employee'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF172554),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            Row(
+              children: [
+                Expanded(
+                  child: actionCard(
+                    'Add Employee',
+                    Icons.person_add_alt_1,
+                    Colors.blue,
+                    () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Add Employee screen coming next!',
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: actionCard(
+                    'View Employees',
+                    Icons.people_outline,
+                    Colors.purple,
+                    () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Employee List screen coming next!',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 28),
 
-            const Text(
-              'Recent Employees',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF172554),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Recent Employees',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Employee List screen coming next!',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('View All'),
+                ),
+              ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             employeeTile(
-              'Rahul Sharma',
-              'HR Department',
-              Icons.person,
+              'AS',
+              'Aarav Sharma',
+              'Human Resources',
+              'Present',
+              Colors.green,
             ),
 
             employeeTile(
+              'PP',
               'Priya Patil',
-              'IT Department',
-              Icons.person,
+              'Information Technology',
+              'Present',
+              Colors.green,
             ),
 
             employeeTile(
-              'Amit Verma',
+              'RV',
+              'Rohan Verma',
               'Finance Department',
-              Icons.person,
+              'On Leave',
+              Colors.orange,
             ),
+
+            const SizedBox(height: 20),
           ],
         ),
+      ),
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: Colors.grey,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        onTap: (index) {
+          setState(() {
+            selectedIndex = index;
+          });
+
+          if (index != 0) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${[
+                    'Dashboard',
+                    'Employees',
+                    'Attendance',
+                    'Profile'
+                  ][index]} screen coming next!',
+                ),
+              ),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard_outlined),
+            activeIcon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people_outline),
+            label: 'Employees',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_outlined),
+            label: 'Attendance',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
 
-  Widget employeeCard(
+  Widget summaryCard(
     String title,
-    String count,
+    String value,
     IconData icon,
     Color color,
   ) {
@@ -180,20 +319,36 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 30),
-          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           Text(
-            count,
+            value,
             style: const TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
+              color: Color(0xFF172554),
             ),
           ),
-          const SizedBox(height: 6),
+
+          const SizedBox(height: 5),
+
           Text(
             title,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: Colors.grey,
             ),
           ),
@@ -202,29 +357,118 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Widget actionCard(
+    String title,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20,
+          horizontal: 12,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 30,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget employeeTile(
+    String initials,
     String name,
     String department,
-    IconData icon,
+    String status,
+    Color statusColor,
   ) {
-    return Card(
-      color: Colors.white,
-      elevation: 0,
+    return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: const Color(0xFFE0E7FF),
-          child: Icon(
-            icon,
-            color: const Color(0xFF172554),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 23,
+            backgroundColor: const Color(0xFFE0E7FF),
+            child: Text(
+              initials,
+              style: const TextStyle(
+                color: Color(0xFF172554),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-        ),
-        title: Text(
-          name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(department),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  department,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 9,
+              vertical: 6,
+            ),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              status,
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
