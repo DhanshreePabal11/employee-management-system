@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
 import '../custom_widgets/employee_card.dart';
+import '../custom_widgets/bottom_nav_bar.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
 import 'employee_details_screen.dart';
+import 'attendence_screen.dart';
+import 'profile_screen.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   final EmployeeRepo employeeRepo;
@@ -27,6 +30,32 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
   String selectedDepartment = 'All Departments';
 
+  // Bottom navigation
+  void handleNavigation(int index) {
+    if (index == 0) {
+      // Return to the Dashboard.
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } else if (index == 1) {
+      // Already on the Employees screen.
+    } else if (index == 2) {
+      // Open Attendance.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AttendenceScreen(),
+        ),
+      );
+    } else if (index == 3) {
+      // Open Profile.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProfileScreen(),
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     searchController.dispose();
@@ -45,19 +74,26 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
         title: const Text(AppStrings.employeeList),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
         elevation: 0,
       ),
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            padding: const EdgeInsets.fromLTRB(
+              20,
+              20,
+              20,
+              24,
+            ),
             decoration: const BoxDecoration(
               color: AppColors.primaryColor,
               borderRadius: BorderRadius.only(
@@ -88,9 +124,14 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
             ),
           ),
 
-          // Search and filter UI
+          // Search and department filter
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              20,
+              16,
+              12,
+            ),
             child: Column(
               children: [
                 TextField(
@@ -107,7 +148,8 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                     ),
                     filled: true,
                     fillColor: AppColors.whiteColor,
-                    contentPadding: const EdgeInsets.symmetric(
+                    contentPadding:
+                        const EdgeInsets.symmetric(
                       vertical: 16,
                     ),
                     border: OutlineInputBorder(
@@ -116,7 +158,9 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 12),
+
                 DropdownButtonFormField<String>(
                   value: selectedDepartment,
                   isExpanded: true,
@@ -154,7 +198,6 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                     }),
                   ],
                   onChanged: (value) {
-                    // Filter functionality will be added later.
                     if (value != null) {
                       setState(() {
                         selectedDepartment = value;
@@ -168,7 +211,9 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
           // Employee count
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+            ),
             child: Row(
               children: [
                 const Icon(
@@ -254,7 +299,12 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                    padding: const EdgeInsets.fromLTRB(
+                      16,
+                      0,
+                      16,
+                      20,
+                    ),
                     itemCount: employees.length,
                     itemBuilder: (context, index) {
                       final employee = employees[index];
@@ -278,6 +328,12 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                   ),
           ),
         ],
+      ),
+
+      // Reusable bottom navigation bar
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: 1,
+        onItemTapped: handleNavigation,
       ),
     );
   }

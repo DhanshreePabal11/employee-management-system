@@ -3,26 +3,52 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
+import '../custom_widgets/bottom_nav_bar.dart';
+import 'profile_screen.dart';
 
 class AttendenceScreen extends StatelessWidget {
   const AttendenceScreen({super.key});
+
+  void handleNavigation(BuildContext context, int index) {
+    if (index == 0) {
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } else if (index == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Open Employees from the Dashboard for now.',
+          ),
+        ),
+      );
+    } else if (index == 2) {
+      // Already on Attendance.
+    } else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProfileScreen(),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
         title: const Text(AppStrings.attendance),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
         elevation: 0,
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             const Text(
               'Attendance Overview',
               style: TextStyle(
@@ -94,7 +120,6 @@ class AttendenceScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Summary heading
             const Text(
               'Attendance Summary',
               style: TextStyle(
@@ -106,7 +131,6 @@ class AttendenceScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // Summary cards
             Row(
               children: [
                 Expanded(
@@ -143,7 +167,6 @@ class AttendenceScreen extends StatelessWidget {
 
             const SizedBox(height: 26),
 
-            // Employee list heading
             Row(
               children: [
                 const Expanded(
@@ -179,7 +202,6 @@ class AttendenceScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // Placeholder employee attendance card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -220,6 +242,14 @@ class AttendenceScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+
+      // Bottom navigation
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: 2,
+        onItemTapped: (index) {
+          handleNavigation(context, index);
+        },
       ),
     );
   }

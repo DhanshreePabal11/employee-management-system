@@ -5,6 +5,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
 import '../custom_widgets/summary_card.dart';
 import '../custom_widgets/employee_card.dart';
+import '../custom_widgets/bottom_nav_bar.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
 import 'add_employee_screen.dart';
@@ -17,7 +18,8 @@ class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() =>
+      _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
@@ -79,11 +81,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void handleNavigation(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
-
-    if (index == 1) {
+    if (index == 0) {
+      // Already on Dashboard.
+      setState(() {
+        selectedIndex = 0;
+      });
+    } else if (index == 1) {
       openEmployeeList();
     } else if (index == 2) {
       openAttendance();
@@ -97,8 +100,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final List<EmployeeModel> employees =
         employeeRepo.getEmployees();
 
-    final int departmentCount =
-        employees.map((employee) => employee.department).toSet().length;
+    final int departmentCount = employees
+        .map((employee) => employee.department)
+        .toSet()
+        .length;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -231,11 +236,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: openAddEmployee,
-                    icon: const Icon(Icons.person_add_alt_1),
-                    label: const Text(AppStrings.addEmployee),
+                    icon: const Icon(
+                      Icons.person_add_alt_1,
+                    ),
+                    label: const Text(
+                      AppStrings.addEmployee,
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.whiteColor,
+                      backgroundColor:
+                          AppColors.primaryColor,
+                      foregroundColor:
+                          AppColors.whiteColor,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
                       ),
@@ -246,10 +257,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: openEmployeeList,
-                    icon: const Icon(Icons.people_outline),
+                    icon: const Icon(
+                      Icons.people_outline,
+                    ),
                     label: const Text('View Employees'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryColor,
+                      foregroundColor:
+                          AppColors.primaryColor,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
                       ),
@@ -261,7 +275,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 28),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
                   'Recent Employees',
@@ -296,30 +311,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primaryColor,
-        unselectedItemColor: AppColors.greyColor,
-        onTap: handleNavigation,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline),
-            label: 'Employees',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            label: 'Attendance',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: selectedIndex,
+        onItemTapped: handleNavigation,
       ),
     );
   }

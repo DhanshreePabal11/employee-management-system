@@ -3,9 +3,38 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
+import '../custom_widgets/bottom_nav_bar.dart';
+import 'attendence_screen.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  void handleNavigation(BuildContext context, int index) {
+    if (index == 0) {
+      // Return to Dashboard.
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } else if (index == 1) {
+      // Open Employees.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Open Employees from the Dashboard for now.',
+          ),
+        ),
+      );
+    } else if (index == 2) {
+      // Open Attendance.
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AttendenceScreen(),
+        ),
+      );
+    } else if (index == 3) {
+      // Already on Profile.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +50,6 @@ class ProfileScreen extends StatelessWidget {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-
           child: Column(
             children: [
               // Profile picture
@@ -83,6 +111,14 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
+
+      // Bottom navigation
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: 3,
+        onItemTapped: (index) {
+          handleNavigation(context, index);
+        },
+      ),
     );
   }
 
@@ -96,7 +132,6 @@ class ProfileScreen extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
-
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
@@ -104,7 +139,6 @@ class ProfileScreen extends StatelessWidget {
           color: AppColors.borderColor,
         ),
       ),
-
       child: Row(
         children: [
           Icon(

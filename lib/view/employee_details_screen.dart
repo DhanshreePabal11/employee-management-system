@@ -5,6 +5,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
 import '../model/employee_model.dart';
 
+
 class EmployeeDetailScreen extends StatelessWidget {
   final EmployeeModel employee;
 

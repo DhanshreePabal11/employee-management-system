@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 
+
 class ActivityHistoryScreen extends StatelessWidget {
   const ActivityHistoryScreen({super.key});
 
