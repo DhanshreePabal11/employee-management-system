@@ -67,188 +67,298 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-
       appBar: AppBar(
         title: const Text(AppStrings.addEmployee),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
+        elevation: 0,
       ),
-
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-
-        child: Form(
-          key: formKey,
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Employee Information',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header section
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+              decoration: const BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
                 ),
               ),
-
-              const SizedBox(height: 8),
-
-              const Text(
-                'Enter the details below to add a new employee.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.greyColor,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Employee name
-              CustomTextField(
-                controller: nameController,
-                label: 'Full Name',
-                prefixIcon: Icons.person_outline,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Enter employee name';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Employee email
-              CustomTextField(
-                controller: emailController,
-                label: AppStrings.email,
-                prefixIcon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Enter email';
-                  }
-
-                  if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                      .hasMatch(value.trim())) {
-                    return 'Enter a valid email';
-                  }
-
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Employee phone
-              CustomTextField(
-                controller: phoneController,
-                label: AppStrings.phone,
-                prefixIcon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null ||
-                      !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
-                    return 'Enter a valid 10-digit phone number';
-                  }
-
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Department dropdown
-              DropdownButtonFormField<String>(
-                value: department,
-                decoration: InputDecoration(
-                  labelText: AppStrings.department,
-                  prefixIcon: const Icon(Icons.business_outlined),
-                  filled: true,
-                  fillColor: AppColors.whiteColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.borderColor,
+              child: const Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white24,
+                    child: Icon(
+                      Icons.person_add_alt_1,
+                      color: AppColors.whiteColor,
+                      size: 30,
                     ),
                   ),
-                ),
-
-                items: const [
-                  DropdownMenuItem(
-                    value: 'HR',
-                    child: Text('Human Resources'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'IT',
-                    child: Text('Information Technology'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Finance',
-                    child: Text('Finance'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Marketing',
-                    child: Text('Marketing'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Sales',
-                    child: Text('Sales'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Operations',
-                    child: Text('Operations'),
+                  SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Add New Employee',
+                          style: TextStyle(
+                            color: AppColors.whiteColor,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Enter employee details to create a profile.',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-
-                onChanged: (value) {
-                  setState(() {
-                    department = value;
-                  });
-                },
-
-                validator: (value) {
-                  if (value == null) {
-                    return 'Select department';
-                  }
-                  return null;
-                },
               ),
+            ),
 
-              const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Personal information section
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.person_outline,
+                          color: AppColors.primaryColor,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Personal Information',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
 
-              // Employee salary
-              CustomTextField(
-                controller: salaryController,
-                label: 'Monthly Salary',
-                prefixIcon: Icons.currency_rupee,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                    const SizedBox(height: 18),
+
+                    CustomTextField(
+                      controller: nameController,
+                      label: 'Full Name',
+                      prefixIcon: Icons.badge_outlined,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Enter employee name';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    CustomTextField(
+                      controller: emailController,
+                      label: AppStrings.email,
+                      prefixIcon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Enter email';
+                        }
+
+                        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                            .hasMatch(value.trim())) {
+                          return 'Enter a valid email';
+                        }
+
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    CustomTextField(
+                      controller: phoneController,
+                      label: AppStrings.phone,
+                      prefixIcon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone,
+                      validator: (value) {
+                        if (value == null ||
+                            !RegExp(r'^\d{10}$')
+                                .hasMatch(value.trim())) {
+                          return 'Enter a valid 10-digit phone number';
+                        }
+
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Work information section
+                    const Row(
+                      children: [
+                        Icon(
+                          Icons.work_outline,
+                          color: AppColors.primaryColor,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Work Information',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    DropdownButtonFormField<String>(
+                      value: department,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: AppStrings.department,
+                        prefixIcon: const Icon(
+                          Icons.business_outlined,
+                          color: AppColors.greyColor,
+                        ),
+                        filled: true,
+                        fillColor: AppColors.whiteColor,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.borderColor,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.borderColor,
+                          ),
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'HR',
+                          child: Text('Human Resources'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'IT',
+                          child: Text('Information Technology'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Finance',
+                          child: Text('Finance'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Marketing',
+                          child: Text('Marketing'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Sales',
+                          child: Text('Sales'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Operations',
+                          child: Text('Operations'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          department = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Select department';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    CustomTextField(
+                      controller: salaryController,
+                      label: 'Monthly Salary',
+                      prefixIcon: Icons.currency_rupee,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (value) {
+                        final salary =
+                            double.tryParse(value?.trim() ?? '');
+
+                        if (salary == null || salary <= 0) {
+                          return 'Enter a valid salary';
+                        }
+
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // Save button
+                    CustomButton(
+                      text: 'Save Employee',
+                      onPressed: saveEmployee,
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Cancel button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryColor,
+                          side: const BorderSide(
+                            color: AppColors.borderColor,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  final salary = double.tryParse(value?.trim() ?? '');
-
-                  if (salary == null || salary <= 0) {
-                    return 'Enter a valid salary';
-                  }
-
-                  return null;
-                },
               ),
-
-              const SizedBox(height: 28),
-
-              // Save employee button
-              CustomButton(
-                text: 'Save Employee',
-                onPressed: saveEmployee,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
