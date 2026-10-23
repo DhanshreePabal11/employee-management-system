@@ -1,5 +1,10 @@
 
 import 'package:flutter/material.dart';
+
+import '../constants/app_colors.dart';
+import '../constants/app_strings.dart';
+import '../custom_widgets/custom_button.dart';
+import '../custom_widgets/custom_text_field.dart';
 import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,7 +15,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -25,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void login() {
-    if (_formKey.currentState!.validate()) {
+    if (formKey.currentState!.validate()) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -38,41 +43,48 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: AppColors.backgroundColor,
+
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
+
             child: Form(
-              key: _formKey,
+              key: formKey,
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // App icon
                   Center(
                     child: Container(
                       height: 76,
                       width: 76,
+
                       decoration: BoxDecoration(
-                        color: const Color(0xFF172554),
+                        color: AppColors.primaryColor,
                         borderRadius: BorderRadius.circular(22),
                       ),
+
                       child: const Icon(
                         Icons.groups_rounded,
                         size: 42,
-                        color: Colors.white,
+                        color: AppColors.whiteColor,
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 28),
 
+                  // Welcome heading
                   const Center(
                     child: Text(
                       'Welcome Back',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF172554),
+                        color: AppColors.primaryColor,
                       ),
                     ),
                   ),
@@ -85,40 +97,35 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: AppColors.greyColor,
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 36),
 
+                  // Email field
                   const Text(
-                    'Email Address',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    AppStrings.email,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
 
                   const SizedBox(height: 8),
 
-                  TextFormField(
+                  CustomTextField(
                     controller: emailController,
+                    label: 'Enter your email',
+                    prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your email',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
 
-                      if (!RegExp(
-                        r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                      ).hasMatch(value.trim())) {
+                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                          .hasMatch(value.trim())) {
                         return 'Please enter a valid email';
                       }
 
@@ -128,37 +135,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
+                  // Password heading
                   const Text(
-                    'Password',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    AppStrings.password,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
 
                   const SizedBox(height: 8),
 
-                  TextFormField(
+                  // Password field
+                  CustomTextField(
                     controller: passwordController,
+                    label: 'Enter your password',
+                    prefixIcon: Icons.lock_outline,
                     obscureText: !isPasswordVisible,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
@@ -172,38 +164,48 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 28),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF172554),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                  // Show or hide password
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        size: 18,
                       ),
-                      child: const Text(
-                        'Sign In',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      label: Text(
+                        isPasswordVisible ? 'Hide Password' : 'Show Password',
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primaryColor,
                       ),
                     ),
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // Login button
+                  CustomButton(
+                    text: 'Sign In',
+                    onPressed: login,
+                  ),
+
                   const SizedBox(height: 20),
 
+                  // App name
                   const Center(
                     child: Text(
-                      'Employee Management System',
+                      AppStrings.appName,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: AppColors.greyColor,
                       ),
                     ),
                   ),

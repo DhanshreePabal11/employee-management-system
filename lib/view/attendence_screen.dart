@@ -1,23 +1,26 @@
 
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+import '../constants/app_strings.dart';
+
 class AttendenceScreen extends StatelessWidget {
   const AttendenceScreen({super.key});
-
-  static const Color primaryColor = Color(0xFF172554);
-  static const Color backgroundColor = Color(0xFFF5F7FB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
-        title: const Text('Attendance'),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        title: const Text(AppStrings.attendance),
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: AppColors.whiteColor,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(20),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -26,37 +29,52 @@ class AttendenceScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: primaryColor,
+                color: AppColors.primaryColor,
               ),
             ),
+
             const SizedBox(height: 8),
+
             const Text(
               'Manage daily employee attendance.',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: AppColors.greyColor,
+              ),
             ),
+
             const SizedBox(height: 24),
+
+            // Present employees
             attendanceCard(
               'Present',
               '0',
               Icons.check_circle_outline,
-              Colors.green,
+              AppColors.greenColor,
             ),
+
+            // Absent employees
             attendanceCard(
               'Absent',
               '0',
               Icons.cancel_outlined,
-              Colors.red,
+              AppColors.redColor,
             ),
+
+            // Employees on leave
             attendanceCard(
               'On Leave',
               '0',
               Icons.event_busy_outlined,
-              Colors.orange,
+              AppColors.orangeColor,
             ),
+
             const SizedBox(height: 16),
+
             const Text(
               'Attendance records will be added here.',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: AppColors.greyColor,
+              ),
             ),
           ],
         ),
@@ -64,6 +82,7 @@ class AttendenceScreen extends StatelessWidget {
     );
   }
 
+  // Creates one attendance summary card
   Widget attendanceCard(
     String title,
     String count,
@@ -74,14 +93,25 @@ class AttendenceScreen extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(18),
+
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.borderColor,
+        ),
       ),
+
       child: Row(
         children: [
-          Icon(icon, color: color, size: 30),
+          Icon(
+            icon,
+            color: color,
+            size: 30,
+          ),
+
           const SizedBox(width: 16),
+
           Expanded(
             child: Text(
               title,
@@ -91,12 +121,13 @@ class AttendenceScreen extends StatelessWidget {
               ),
             ),
           ),
+
           Text(
             count,
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: primaryColor,
+              color: AppColors.primaryColor,
             ),
           ),
         ],

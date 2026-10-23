@@ -1,5 +1,8 @@
 
 import 'package:flutter/material.dart';
+
+import '../constants/app_colors.dart';
+import '../constants/app_strings.dart';
 import '../model/employee_model.dart';
 
 class EmployeeDetailScreen extends StatelessWidget {
@@ -10,58 +13,62 @@ class EmployeeDetailScreen extends StatelessWidget {
     required this.employee,
   });
 
-  static const Color primaryColor = Color(0xFF172554);
-  static const Color backgroundColor = Color(0xFFF5F7FB);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
-        title: const Text('Employee Details'),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        title: const Text(AppStrings.employeeDetails),
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: AppColors.whiteColor,
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
+
         child: Column(
           children: [
             const SizedBox(height: 20),
 
+            // Employee icon
             const CircleAvatar(
               radius: 45,
-              backgroundColor: Color(0xFFE0E7FF),
+              backgroundColor: AppColors.lightBlueColor,
               child: Icon(
                 Icons.person,
                 size: 50,
-                color: primaryColor,
+                color: AppColors.primaryColor,
               ),
             ),
 
             const SizedBox(height: 16),
 
+            // Employee name
             Text(
               employee.name,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,
-                color: primaryColor,
+                color: AppColors.primaryColor,
               ),
             ),
 
             const SizedBox(height: 6),
 
+            // Employee department
             Text(
               employee.department,
               style: const TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: AppColors.greyColor,
               ),
             ),
 
             const SizedBox(height: 28),
 
+            // Employee information
             detailCard(
               Icons.email_outlined,
               'Email',
@@ -70,19 +77,19 @@ class EmployeeDetailScreen extends StatelessWidget {
 
             detailCard(
               Icons.phone_outlined,
-              'Phone',
+              AppStrings.phone,
               employee.phone,
             ),
 
             detailCard(
               Icons.business_outlined,
-              'Department',
+              AppStrings.department,
               employee.department,
             ),
 
             detailCard(
               Icons.currency_rupee,
-              'Salary',
+              'Monthly Salary',
               '₹${employee.salary.toStringAsFixed(2)}',
             ),
           ],
@@ -91,27 +98,31 @@ class EmployeeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget detailCard(
-    IconData icon,
-    String title,
-    String value,
-  ) {
+  // Displays one employee detail
+  Widget detailCard(IconData icon, String title, String value) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.borderColor,
+        ),
       ),
+
       child: Row(
         children: [
           Icon(
             icon,
-            color: primaryColor,
+            color: AppColors.primaryColor,
             size: 25,
           ),
+
           const SizedBox(width: 14),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,16 +130,19 @@ class EmployeeDetailScreen extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Colors.grey,
+                    color: AppColors.greyColor,
                     fontSize: 13,
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
                   value,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.primaryColor,
                   ),
                 ),
               ],

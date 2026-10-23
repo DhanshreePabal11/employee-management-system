@@ -1,23 +1,26 @@
 
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+import '../constants/app_strings.dart';
+
 class EmployeeScreen extends StatelessWidget {
   const EmployeeScreen({super.key});
-
-  static const Color primaryColor = Color(0xFF172554);
-  static const Color backgroundColor = Color(0xFFF5F7FB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
         title: const Text('Employee Management'),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: AppColors.whiteColor,
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -26,44 +29,54 @@ class EmployeeScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,
-                color: primaryColor,
+                color: AppColors.primaryColor,
               ),
             ),
+
             const SizedBox(height: 8),
+
             const Text(
               'Manage employee information in one place.',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.greyColor,
               ),
             ),
+
             const SizedBox(height: 24),
 
+            // Employee portal banner
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
+
               decoration: BoxDecoration(
-                color: primaryColor,
+                color: AppColors.primaryColor,
                 borderRadius: BorderRadius.circular(18),
               ),
+
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
                     Icons.groups_rounded,
                     size: 38,
-                    color: Colors.white,
+                    color: AppColors.whiteColor,
                   ),
+
                   SizedBox(height: 14),
+
                   Text(
-                    'Employee Portal',
+                    AppStrings.dashboard,
                     style: TextStyle(
                       fontSize: 21,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.whiteColor,
                     ),
                   ),
+
                   SizedBox(height: 6),
+
                   Text(
                     'View and manage your employee records.',
                     style: TextStyle(
@@ -82,28 +95,34 @@ class EmployeeScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: primaryColor,
+                color: AppColors.primaryColor,
               ),
             ),
+
             const SizedBox(height: 14),
 
+            // Add employee feature
             featureCard(
               Icons.person_add_alt_1,
-              'Add Employee',
+              AppStrings.addEmployee,
               'Register a new employee.',
-              Colors.blue,
+              AppColors.primaryColor,
             ),
+
+            // Employee list feature
             featureCard(
               Icons.people_outline,
               'Employee Directory',
               'View employee information.',
-              Colors.green,
+              AppColors.greenColor,
             ),
+
+            // Employee details feature
             featureCard(
               Icons.badge_outlined,
-              'Employee Details',
+              AppStrings.employeeDetails,
               'Review employee profiles.',
-              Colors.orange,
+              AppColors.orangeColor,
             ),
           ],
         ),
@@ -111,6 +130,7 @@ class EmployeeScreen extends StatelessWidget {
     );
   }
 
+  // Creates one feature card
   Widget featureCard(
     IconData icon,
     String title,
@@ -121,25 +141,34 @@ class EmployeeScreen extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.borderColor,
+        ),
       ),
+
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
+
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
+
             child: Icon(
               icon,
               color: color,
               size: 26,
             ),
           ),
+
           const SizedBox(width: 14),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,14 +178,17 @@ class EmployeeScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor,
                   ),
                 ),
+
                 const SizedBox(height: 5),
+
                 Text(
                   description,
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Colors.grey,
+                    color: AppColors.greyColor,
                   ),
                 ),
               ],

@@ -1,5 +1,10 @@
 
 import 'package:flutter/material.dart';
+
+import '../constants/app_colors.dart';
+import '../constants/app_strings.dart';
+import '../custom_widgets/custom_button.dart';
+import '../custom_widgets/custom_text_field.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
 
@@ -12,13 +17,11 @@ class AddEmployeeScreen extends StatefulWidget {
   });
 
   @override
-  State<AddEmployeeScreen> createState() =>
-      _AddEmployeeScreenState();
+  State<AddEmployeeScreen> createState() => _AddEmployeeScreenState();
 }
 
-class _AddEmployeeScreenState
-    extends State<AddEmployeeScreen> {
-  final _formKey = GlobalKey<FormState>();
+class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
+  final formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -37,7 +40,7 @@ class _AddEmployeeScreenState
   }
 
   void saveEmployee() {
-    if (!_formKey.currentState!.validate()) {
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
@@ -53,7 +56,7 @@ class _AddEmployeeScreenState
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Employee added successfully!'),
+        content: Text(AppStrings.employeeAdded),
       ),
     );
 
@@ -62,19 +65,21 @@ class _AddEmployeeScreenState
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF172554);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: AppColors.backgroundColor,
+
       appBar: AppBar(
-        title: const Text('Add Employee'),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        title: const Text(AppStrings.addEmployee),
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: AppColors.whiteColor,
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
+
         child: Form(
-          key: _formKey,
+          key: formKey,
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -83,20 +88,27 @@ class _AddEmployeeScreenState
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: primaryColor,
+                  color: AppColors.primaryColor,
                 ),
               ),
-              const SizedBox(height: 20),
 
-              TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Full Name',
-                  prefixIcon: Icon(Icons.person_outline),
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
+              const SizedBox(height: 8),
+
+              const Text(
+                'Enter the details below to add a new employee.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.greyColor,
                 ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Employee name
+              CustomTextField(
+                controller: nameController,
+                label: 'Full Name',
+                prefixIcon: Icons.person_outline,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Enter employee name';
@@ -104,60 +116,68 @@ class _AddEmployeeScreenState
                   return null;
                 },
               ),
+
               const SizedBox(height: 16),
 
-              TextFormField(
+              // Employee email
+              CustomTextField(
                 controller: emailController,
+                label: AppStrings.email,
+                prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email Address',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Enter email';
                   }
-                  if (!RegExp(
-                    r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                  ).hasMatch(value.trim())) {
+
+                  if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                      .hasMatch(value.trim())) {
                     return 'Enter a valid email';
                   }
+
                   return null;
                 },
               ),
+
               const SizedBox(height: 16),
 
-              TextFormField(
+              // Employee phone
+              CustomTextField(
                 controller: phoneController,
+                label: AppStrings.phone,
+                prefixIcon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
-                  prefixIcon: Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
                 validator: (value) {
                   if (value == null ||
                       !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
                     return 'Enter a valid 10-digit phone number';
                   }
+
                   return null;
                 },
               ),
+
               const SizedBox(height: 16),
 
+              // Department dropdown
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Department',
-                  prefixIcon: Icon(Icons.business_outlined),
-                  border: OutlineInputBorder(),
+                value: department,
+                decoration: InputDecoration(
+                  labelText: AppStrings.department,
+                  prefixIcon: const Icon(Icons.business_outlined),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.whiteColor,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: AppColors.borderColor,
+                    ),
+                  ),
                 ),
+
                 items: const [
                   DropdownMenuItem(
                     value: 'HR',
@@ -184,11 +204,13 @@ class _AddEmployeeScreenState
                     child: Text('Operations'),
                   ),
                 ],
+
                 onChanged: (value) {
                   setState(() {
                     department = value;
                   });
                 },
+
                 validator: (value) {
                   if (value == null) {
                     return 'Select department';
@@ -196,44 +218,34 @@ class _AddEmployeeScreenState
                   return null;
                 },
               ),
+
               const SizedBox(height: 16),
 
-              TextFormField(
+              // Employee salary
+              CustomTextField(
                 controller: salaryController,
+                label: 'Monthly Salary',
+                prefixIcon: Icons.currency_rupee,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Monthly Salary',
-                  prefixIcon: Icon(Icons.currency_rupee),
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
                 validator: (value) {
-                  final salary = double.tryParse(
-                    value?.trim() ?? '',
-                  );
+                  final salary = double.tryParse(value?.trim() ?? '');
 
                   if (salary == null || salary <= 0) {
                     return 'Enter a valid salary';
                   }
+
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
 
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: saveEmployee,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Save Employee'),
-                ),
+              const SizedBox(height: 28),
+
+              // Save employee button
+              CustomButton(
+                text: 'Save Employee',
+                onPressed: saveEmployee,
               ),
             ],
           ),

@@ -1,6 +1,10 @@
 
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+import '../constants/app_strings.dart';
+import '../custom_widgets/summary_card.dart';
+import '../custom_widgets/employee_card.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
 import 'add_employee_screen.dart';
@@ -19,9 +23,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final EmployeeRepo employeeRepo = EmployeeRepo();
 
   int selectedIndex = 0;
-
-  static const Color primaryColor = Color(0xFF172554);
-  static const Color backgroundColor = Color(0xFFF5F7FB);
 
   Future<void> openAddEmployee() async {
     await Navigator.push(
@@ -78,13 +79,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       openAttendance();
     } else if (index == 3) {
       openProfile();
-    } else {
-      return;
     }
-
-    setState(() {
-      selectedIndex = 0;
-    });
   }
 
   @override
@@ -96,23 +91,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
         employees.map((employee) => employee.department).toSet().length;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.backgroundColor,
 
       appBar: AppBar(
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: AppColors.whiteColor,
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Employee Portal',
+              AppStrings.dashboard,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              'Management Dashboard',
+              AppStrings.dashboardSubtitle,
               style: TextStyle(fontSize: 12),
             ),
           ],
@@ -146,15 +141,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,
-                color: primaryColor,
+                color: AppColors.primaryColor,
               ),
             ),
             const SizedBox(height: 6),
+
             const Text(
               'Here is what is happening in your workplace today.',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey,
+                color: AppColors.greyColor,
               ),
             ),
             const SizedBox(height: 24),
@@ -164,6 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
               ),
             ),
             const SizedBox(height: 14),
@@ -171,20 +168,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Row(
               children: [
                 Expanded(
-                  child: summaryCard(
-                    'Total Employees',
-                    '${employees.length}',
-                    Icons.groups_rounded,
-                    Colors.blue,
+                  child: SummaryCard(
+                    title: AppStrings.totalEmployees,
+                    value: '${employees.length}',
+                    icon: Icons.groups_rounded,
+                    iconColor: Colors.blue,
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: summaryCard(
-                    'Present Today',
-                    '0',
-                    Icons.check_circle_outline,
-                    Colors.green,
+                const Expanded(
+                  child: SummaryCard(
+                    title: AppStrings.presentToday,
+                    value: '0',
+                    icon: Icons.check_circle_outline,
+                    iconColor: AppColors.greenColor,
                   ),
                 ),
               ],
@@ -193,21 +190,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             Row(
               children: [
-                Expanded(
-                  child: summaryCard(
-                    'On Leave',
-                    '0',
-                    Icons.event_busy_outlined,
-                    Colors.orange,
+                const Expanded(
+                  child: SummaryCard(
+                    title: AppStrings.onLeave,
+                    value: '0',
+                    icon: Icons.event_busy_outlined,
+                    iconColor: AppColors.orangeColor,
                   ),
                 ),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: summaryCard(
-                    'Departments',
-                    '$departmentCount',
-                    Icons.business_outlined,
-                    Colors.purple,
+                  child: SummaryCard(
+                    title: AppStrings.departments,
+                    value: '$departmentCount',
+                    icon: Icons.business_outlined,
+                    iconColor: Colors.purple,
                   ),
                 ),
               ],
@@ -219,6 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
               ),
             ),
             const SizedBox(height: 14),
@@ -229,10 +226,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: ElevatedButton.icon(
                     onPressed: openAddEmployee,
                     icon: const Icon(Icons.person_add_alt_1),
-                    label: const Text('Add Employee'),
+                    label: const Text(AppStrings.addEmployee),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: AppColors.whiteColor,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
                       ),
@@ -246,7 +243,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: const Icon(Icons.people_outline),
                     label: const Text('View Employees'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: primaryColor,
+                      foregroundColor: AppColors.primaryColor,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
                       ),
@@ -265,6 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor,
                   ),
                 ),
                 TextButton(
@@ -278,11 +276,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (employees.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('No employees added yet.'),
+                child: Text(AppStrings.noEmployees),
               )
             else
               ...employees.take(3).map(
-                (employee) => employeeTile(employee),
+                (employee) => EmployeeCard(
+                  name: employee.name,
+                  department: employee.department,
+                  onTap: openEmployeeList,
+                ),
               ),
           ],
         ),
@@ -291,8 +293,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: primaryColor,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: AppColors.primaryColor,
+        unselectedItemColor: AppColors.greyColor,
         onTap: handleNavigation,
         items: const [
           BottomNavigationBarItem(
@@ -310,87 +312,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget summaryCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 14),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: primaryColor,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget employeeTile(EmployeeModel employee) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            backgroundColor: Color(0xFFE0E7FF),
-            child: Icon(
-              Icons.person,
-              color: primaryColor,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  employee.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  employee.department,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
