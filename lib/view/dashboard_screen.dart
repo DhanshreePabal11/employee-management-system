@@ -1,7 +1,12 @@
 
 import 'package:flutter/material.dart';
-import 'add_employee_screen.dart';
 
+import '../model/employee_model.dart';
+import '../repo/employee_repo.dart';
+import 'add_employee_screen.dart';
+import 'employee_list_screen.dart';
+import 'attendence_screen.dart';
+import 'profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -11,20 +16,91 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final EmployeeRepo employeeRepo = EmployeeRepo();
+
   int selectedIndex = 0;
 
-  final Color primaryColor = const Color(0xFF172554);
-  final Color backgroundColor = const Color(0xFFF5F7FB);
+  static const Color primaryColor = Color(0xFF172554);
+  static const Color backgroundColor = Color(0xFFF5F7FB);
+
+  Future<void> openAddEmployee() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEmployeeScreen(
+          employeeRepo: employeeRepo,
+        ),
+      ),
+    );
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void openEmployeeList() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EmployeeListScreen(
+          employeeRepo: employeeRepo,
+        ),
+      ),
+    );
+  }
+
+  void openAttendance() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AttendenceScreen(),
+      ),
+    );
+  }
+
+  void openProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ProfileScreen(),
+      ),
+    );
+  }
+
+  void handleNavigation(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+
+    if (index == 1) {
+      openEmployeeList();
+    } else if (index == 2) {
+      openAttendance();
+    } else if (index == 3) {
+      openProfile();
+    } else {
+      return;
+    }
+
+    setState(() {
+      selectedIndex = 0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<EmployeeModel> employees =
+        employeeRepo.getEmployees();
+
+    final int departmentCount =
+        employees.map((employee) => employee.department).toSet().length;
+
     return Scaffold(
       backgroundColor: backgroundColor,
 
       appBar: AppBar(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        elevation: 0,
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,16 +128,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
             icon: const Icon(Icons.notifications_none),
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(
-                Icons.person,
-                color: Color(0xFF172554),
-              ),
-            ),
+          IconButton(
+            onPressed: openProfile,
+            icon: const Icon(Icons.account_circle_outlined),
           ),
+          const SizedBox(width: 8),
         ],
       ),
 
@@ -71,16 +142,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Good Morning, Dhanshree!',
+              'Good Morning!',
               style: TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF172554),
+                color: primaryColor,
               ),
             ),
-
             const SizedBox(height: 6),
-
             const Text(
               'Here is what is happening in your workplace today.',
               style: TextStyle(
@@ -88,7 +157,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: Colors.grey,
               ),
             ),
-
             const SizedBox(height: 24),
 
             const Text(
@@ -98,7 +166,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 14),
 
             Row(
@@ -106,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: summaryCard(
                     'Total Employees',
-                    '128',
+                    '${employees.length}',
                     Icons.groups_rounded,
                     Colors.blue,
                   ),
@@ -115,14 +182,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: summaryCard(
                     'Present Today',
-                    '112',
+                    '0',
                     Icons.check_circle_outline,
                     Colors.green,
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
 
             Row(
@@ -130,7 +196,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: summaryCard(
                     'On Leave',
-                    '8',
+                    '0',
                     Icons.event_busy_outlined,
                     Colors.orange,
                   ),
@@ -139,14 +205,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Expanded(
                   child: summaryCard(
                     'Departments',
-                    '6',
+                    '$departmentCount',
                     Icons.business_outlined,
                     Colors.purple,
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 28),
 
             const Text(
@@ -156,23 +221,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 14),
 
-            // Add Employee and View Employees buttons
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const AddEmployeeScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: openAddEmployee,
                     icon: const Icon(Icons.person_add_alt_1),
                     label: const Text('Add Employee'),
                     style: ElevatedButton.styleFrom(
@@ -180,46 +235,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
-                        horizontal: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 12),
-
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Employee List screen coming next!',
-                          ),
-                        ),
-                      );
-                    },
+                  child: OutlinedButton.icon(
+                    onPressed: openEmployeeList,
                     icon: const Icon(Icons.people_outline),
                     label: const Text('View Employees'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                    style: OutlinedButton.styleFrom(
                       foregroundColor: primaryColor,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
-                        horizontal: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 28),
 
             Row(
@@ -233,47 +268,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Employee List screen coming next!',
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: openEmployeeList,
                   child: const Text('View All'),
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
 
-            employeeTile(
-              'AS',
-              'Aarav Sharma',
-              'Human Resources',
-              'Present',
-              Colors.green,
-            ),
-
-            employeeTile(
-              'PP',
-              'Priya Patil',
-              'Information Technology',
-              'Present',
-              Colors.green,
-            ),
-
-            employeeTile(
-              'RV',
-              'Rohan Verma',
-              'Finance Department',
-              'On Leave',
-              Colors.orange,
-            ),
-
-            const SizedBox(height: 20),
+            if (employees.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text('No employees added yet.'),
+              )
+            else
+              ...employees.take(3).map(
+                (employee) => employeeTile(employee),
+              ),
           ],
         ),
       ),
@@ -281,37 +291,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
         selectedItemColor: primaryColor,
         unselectedItemColor: Colors.grey,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-
-        onTap: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-
-          if (index != 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${[
-                    'Dashboard',
-                    'Employees',
-                    'Attendance',
-                    'Profile',
-                  ][index]} screen coming next!',
-                ),
-              ),
-            );
-          }
-        },
-
+        onTap: handleNavigation,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
@@ -346,32 +331,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 14),
           Text(
             value,
             style: const TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF172554),
+              color: primaryColor,
             ),
           ),
-
           const SizedBox(height: 5),
-
           Text(
             title,
             style: const TextStyle(
@@ -384,13 +354,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget employeeTile(
-    String initials,
-    String name,
-    String department,
-    String status,
-    Color statusColor,
-  ) {
+  Widget employeeTile(EmployeeModel employee) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
@@ -400,59 +364,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 23,
-            backgroundColor: const Color(0xFFE0E7FF),
-            child: Text(
-              initials,
-              style: const TextStyle(
-                color: Color(0xFF172554),
-                fontWeight: FontWeight.bold,
-              ),
+          const CircleAvatar(
+            backgroundColor: Color(0xFFE0E7FF),
+            child: Icon(
+              Icons.person,
+              color: primaryColor,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  employee.name,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 5),
                 Text(
-                  department,
+                  employee.department,
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.grey,
                   ),
                 ),
               ],
-            ),
-          ),
-
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 9,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                color: statusColor,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
             ),
           ),
         ],

@@ -1,14 +1,23 @@
 
 import 'package:flutter/material.dart';
+import '../model/employee_model.dart';
+import '../repo/employee_repo.dart';
 
 class AddEmployeeScreen extends StatefulWidget {
-  const AddEmployeeScreen({super.key});
+  final EmployeeRepo employeeRepo;
+
+  const AddEmployeeScreen({
+    super.key,
+    required this.employeeRepo,
+  });
 
   @override
-  State<AddEmployeeScreen> createState() => _AddEmployeeScreenState();
+  State<AddEmployeeScreen> createState() =>
+      _AddEmployeeScreenState();
 }
 
-class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
+class _AddEmployeeScreenState
+    extends State<AddEmployeeScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
@@ -17,19 +26,6 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   final salaryController = TextEditingController();
 
   String? department;
-
-  void saveEmployee() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Employee added successfully!'),
-
-        ),
-      );
-
-      Navigator.pop(context);
-    }
-  }
 
   @override
   void dispose() {
@@ -40,13 +36,39 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     super.dispose();
   }
 
+  void saveEmployee() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final employee = EmployeeModel(
+      name: nameController.text.trim(),
+      email: emailController.text.trim(),
+      phone: phoneController.text.trim(),
+      department: department!,
+      salary: double.parse(salaryController.text.trim()),
+    );
+
+    widget.employeeRepo.addEmployee(employee);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Employee added successfully!'),
+      ),
+    );
+
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF172554);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: const Text('Add Employee'),
-        backgroundColor: const Color(0xFF172554),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -61,10 +83,9 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF172554),
+                  color: primaryColor,
                 ),
               ),
-
               const SizedBox(height: 20),
 
               TextFormField(
@@ -77,13 +98,12 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   fillColor: Colors.white,
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return 'Enter employee name';
                   }
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
 
               TextFormField(
@@ -97,16 +117,17 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   fillColor: Colors.white,
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return 'Enter email';
                   }
-                  if (!value.contains('@')) {
+                  if (!RegExp(
+                    r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                  ).hasMatch(value.trim())) {
                     return 'Enter a valid email';
                   }
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
 
               TextFormField(
@@ -120,16 +141,13 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   fillColor: Colors.white,
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Enter phone number';
-                  }
-                  if (value.length != 10) {
-                    return 'Enter 10-digit phone number';
+                  if (value == null ||
+                      !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
+                    return 'Enter a valid 10-digit phone number';
                   }
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
@@ -161,6 +179,10 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     value: 'Sales',
                     child: Text('Sales'),
                   ),
+                  DropdownMenuItem(
+                    value: 'Operations',
+                    child: Text('Operations'),
+                  ),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -174,12 +196,13 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
 
               TextFormField(
                 controller: salaryController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
                   labelText: 'Monthly Salary',
                   prefixIcon: Icon(Icons.currency_rupee),
@@ -188,13 +211,16 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   fillColor: Colors.white,
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Enter salary';
+                  final salary = double.tryParse(
+                    value?.trim() ?? '',
+                  );
+
+                  if (salary == null || salary <= 0) {
+                    return 'Enter a valid salary';
                   }
                   return null;
                 },
               ),
-
               const SizedBox(height: 24),
 
               SizedBox(
@@ -203,7 +229,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                 child: ElevatedButton(
                   onPressed: saveEmployee,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF172554),
+                    backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Save Employee'),

@@ -1,120 +1,98 @@
 
 import 'package:flutter/material.dart';
-import 'employee_details_screen.dart';
-class EmployeeListScreen extends StatelessWidget {
-  EmployeeListScreen({super.key});
 
-  final List<Map<String, String>> employees = [
-    {
-      'id': 'EMP001',
-      'name': 'Rahul Sharma',
-      'designation': 'Software Developer',
-      'email': 'rahul@example.com',
-      'phone': '9876543210',
-      'department': 'Information Technology',
-      'salary': '35000',
-    },
-    {
-      'id': 'EMP002',
-      'name': 'Priya Patil',
-      'designation': 'HR Executive',
-      'email': 'priya@example.com',
-      'phone': '9876543211',
-      'department': 'Human Resources',
-      'salary': '30000',
-    },
-    {
-      'id': 'EMP003',
-      'name': 'Amit Deshmukh',
-      'designation': 'Accountant',
-      'email': 'amit@example.com',
-      'phone': '9876543212',
-      'department': 'Finance',
-      'salary': '32000',
-    },
-  ];
+import '../model/employee_model.dart';
+import '../repo/employee_repo.dart';
+import 'employee_details_screen.dart';
+
+class EmployeeListScreen extends StatefulWidget {
+  final EmployeeRepo employeeRepo;
+
+  const EmployeeListScreen({
+    super.key,
+    required this.employeeRepo,
+  });
+
+  @override
+  State<EmployeeListScreen> createState() =>
+      _EmployeeListScreenState();
+}
+
+class _EmployeeListScreenState extends State<EmployeeListScreen> {
+  static const Color primaryColor = Color(0xFF172554);
+  static const Color backgroundColor = Color(0xFFF5F7FB);
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF172554);
+    final List<EmployeeModel> employees =
+        widget.employeeRepo.getEmployees();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
-
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text('Employee List'),
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
       ),
-
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: employees.length,
-        itemBuilder: (context, index) {
-          final employee = employees[index];
-
-          return Card(
-            color: Colors.white,
-            margin: const EdgeInsets.only(bottom: 12),
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(12),
-
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE3ECFF),
-                child: Icon(
-                  Icons.person,
-                  color: primaryColor,
-                ),
+      body: employees.isEmpty
+          ? const Center(
+              child: Text(
+                'No employees found.\nPlease add an employee.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16),
               ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: employees.length,
+              itemBuilder: (context, index) {
+                final employee = employees[index];
 
-              title: Text(
-                employee['name']!,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor,
-                ),
-              ),
-
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: Text(
-                  '${employee['designation']}\n'
-                  '${employee['department']}',
-                ),
-              ),
-
-              isThreeLine: true,
-
-              trailing: const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: primaryColor,
-              ),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EmployeeDetailScreen(
-                      name: employee['name']!,
-                      email: employee['email']!,
-                      phone: employee['phone']!,
-                      department: employee['department']!,
-                      salary: employee['salary']!,
-                      employeeId: employee['id']!,
-                      designation: employee['designation']!,
+                return Card(
+                  color: Colors.white,
+                  elevation: 1,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(12),
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFE0E7FF),
+                      child: Icon(
+                        Icons.person,
+                        color: primaryColor,
+                      ),
                     ),
+                    title: Text(
+                      employee.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${employee.department}\n${employee.email}',
+                    ),
+                    isThreeLine: true,
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EmployeeDetailScreen(
+                            employee: employee,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
             ),
-          );
-        },
-      ),
     );
   }
 }
