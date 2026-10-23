@@ -11,6 +11,7 @@ import 'add_employee_screen.dart';
 import 'employee_list_screen.dart';
 import 'attendence_screen.dart';
 import 'profile_screen.dart';
+import 'activity_history_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -68,6 +69,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  void openActivityHistory() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ActivityHistoryScreen(),
+      ),
+    );
+  }
+
   void handleNavigation(int index) {
     setState(() {
       selectedIndex = index;
@@ -114,18 +124,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No new notifications'),
-                ),
-              );
-            },
+            onPressed: openActivityHistory,
             icon: const Icon(Icons.notifications_none),
+            tooltip: 'Activity History',
           ),
           IconButton(
             onPressed: openProfile,
             icon: const Icon(Icons.account_circle_outlined),
+            tooltip: 'Profile',
           ),
           const SizedBox(width: 8),
         ],
