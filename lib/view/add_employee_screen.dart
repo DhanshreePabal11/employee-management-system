@@ -23,6 +23,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Employee added successfully!'),
+
         ),
       );
 
