@@ -2,15 +2,31 @@
 import 'package:flutter/material.dart';
 
 class EmployeeDetailScreen extends StatelessWidget {
-  const EmployeeDetailScreen({super.key});
+  final String name;
+  final String email;
+  final String phone;
+  final String department;
+  final String salary;
+  final String employeeId;
+  final String designation;
+
+  const EmployeeDetailScreen({
+    super.key,
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.department,
+    required this.salary,
+    required this.employeeId,
+    required this.designation,
+  });
 
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF172554);
-    const backgroundColor = Color(0xFFF5F7FB);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: const Color(0xFFF5F7FB),
 
       appBar: AppBar(
         title: const Text('Employee Details'),
@@ -44,9 +60,10 @@ class EmployeeDetailScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  const Text(
-                    'Rahul Sharma',
-                    style: TextStyle(
+                  Text(
+                    name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
                       fontSize: 23,
                       fontWeight: FontWeight.bold,
                       color: primaryColor,
@@ -55,9 +72,9 @@ class EmployeeDetailScreen extends StatelessWidget {
 
                   const SizedBox(height: 6),
 
-                  const Text(
-                    'Software Developer',
-                    style: TextStyle(
+                  Text(
+                    designation,
+                    style: const TextStyle(
                       fontSize: 15,
                       color: Colors.grey,
                     ),
@@ -88,7 +105,7 @@ class EmployeeDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Personal Information
+            // Employee Information
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -100,7 +117,7 @@ class EmployeeDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Personal Information',
+                    'Employee Information',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -113,31 +130,31 @@ class EmployeeDetailScreen extends StatelessWidget {
                   detailRow(
                     Icons.badge_outlined,
                     'Employee ID',
-                    'EMP001',
+                    employeeId,
                   ),
 
                   detailRow(
                     Icons.email_outlined,
                     'Email Address',
-                    'rahul@example.com',
+                    email,
                   ),
 
                   detailRow(
                     Icons.phone_outlined,
                     'Phone Number',
-                    '9876543210',
+                    phone,
                   ),
 
                   detailRow(
                     Icons.business_outlined,
                     'Department',
-                    'Information Technology',
+                    department,
                   ),
 
                   detailRow(
                     Icons.currency_rupee,
                     'Monthly Salary',
-                    '₹35,000',
+                    '₹$salary',
                   ),
 
                   detailRow(
@@ -151,7 +168,7 @@ class EmployeeDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Edit Button
+            // Edit Employee Button
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -168,9 +185,6 @@ class EmployeeDetailScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
                 ),
               ),
             ),
@@ -190,6 +204,7 @@ class EmployeeDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(width: 0),
           Icon(
             icon,
             color: const Color(0xFF172554),

@@ -1,98 +1,119 @@
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import 'employee_details_screen.dart';
 class EmployeeListScreen extends StatelessWidget {
-  const EmployeeListScreen({super.key});
+  EmployeeListScreen({super.key});
+
+  final List<Map<String, String>> employees = [
+    {
+      'id': 'EMP001',
+      'name': 'Rahul Sharma',
+      'designation': 'Software Developer',
+      'email': 'rahul@example.com',
+      'phone': '9876543210',
+      'department': 'Information Technology',
+      'salary': '35000',
+    },
+    {
+      'id': 'EMP002',
+      'name': 'Priya Patil',
+      'designation': 'HR Executive',
+      'email': 'priya@example.com',
+      'phone': '9876543211',
+      'department': 'Human Resources',
+      'salary': '30000',
+    },
+    {
+      'id': 'EMP003',
+      'name': 'Amit Deshmukh',
+      'designation': 'Accountant',
+      'email': 'amit@example.com',
+      'phone': '9876543212',
+      'department': 'Finance',
+      'salary': '32000',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final employees = [
-      ['Rahul Sharma', 'Software Developer', 'IT'],
-      ['Priya Singh', 'HR Manager', 'HR'],
-      ['Amit Kumar', 'Accountant', 'Finance'],
-      ['Sneha Patil', 'UI Designer', 'Design'],
-    ];
+    const primaryColor = Color(0xFF172554);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
+
       appBar: AppBar(
-        title: const Text('Employees'),
-        backgroundColor: const Color(0xFF17365D),
+        title: const Text('Employee List'),
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
       ),
 
-      body: Padding(
+      body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Employee Directory',
-              style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+        itemCount: employees.length,
+        itemBuilder: (context, index) {
+          final employee = employees[index];
+
+          return Card(
+            color: Colors.white,
+            margin: const EdgeInsets.only(bottom: 12),
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(12),
 
-
-            const SizedBox(height: 6),
-
-
-            const Text(
-              'Manage your team members',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-
-            Expanded(
-              child: ListView.builder(
-                itemCount: employees.length,
-                itemBuilder: (context, index) {
-                  final employee = employees[index];
-
-                  return Card(
-                    color: Colors.white,
-                    elevation: 0,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(12),
-                      leading: CircleAvatar(
-                        backgroundColor: const Color(0xFFE3ECFF),
-                        child: Text(
-                          employee[0][0],
-                          style: const TextStyle(
-                            color: Color(0xFF17365D),
-                            fontWeight: FontWeight.bold,
-                          ),
-
-                        ),
-
-                      ),
-
-                      title: Text(
-                        employee[0],
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-
-                      subtitle: Text(
-                        '${employee[1]}\n${employee[2]} Department',
-                      ),
-
-                      isThreeLine: true,
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    ),
-
-                  );
-
-                },
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFE3ECFF),
+                child: Icon(
+                  Icons.person,
+                  color: primaryColor,
+                ),
               ),
 
+              title: Text(
+                employee['name']!,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+              ),
+
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 5),
+                child: Text(
+                  '${employee['designation']}\n'
+                  '${employee['department']}',
+                ),
+              ),
+
+              isThreeLine: true,
+
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: primaryColor,
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EmployeeDetailScreen(
+                      name: employee['name']!,
+                      email: employee['email']!,
+                      phone: employee['phone']!,
+                      department: employee['department']!,
+                      salary: employee['salary']!,
+                      employeeId: employee['id']!,
+                      designation: employee['designation']!,
+                    ),
+                  ),
+                );
+              },
             ),
-            
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color(0xFF17365D),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
+          );
+        },
       ),
     );
   }
