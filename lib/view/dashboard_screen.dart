@@ -36,7 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
-    
+
 
     if (mounted) {
       setState(() {});
@@ -263,9 +263,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                 ),
-
+                
                 const SizedBox(width: 12),
-
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: openEmployeeList,
