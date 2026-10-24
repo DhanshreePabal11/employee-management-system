@@ -7,6 +7,7 @@ import '../custom_widgets/employee_card.dart';
 import '../custom_widgets/bottom_nav_bar.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
+import '../repo/employee_api_repo.dart';
 import 'employee_details_screen.dart';
 import 'attendence_screen.dart';
 import 'profile_screen.dart';
@@ -24,21 +25,74 @@ class EmployeeListScreen extends StatefulWidget {
       _EmployeeListScreenState();
 }
 
-class _EmployeeListScreenState extends State<EmployeeListScreen> {
+class _EmployeeListScreenState
+    extends State<EmployeeListScreen> {
   final TextEditingController searchController =
       TextEditingController();
 
+  final EmployeeApiRepo employeeApiRepo = EmployeeApiRepo();
+
+  List<EmployeeModel> employees = [];
+
+  bool isLoading = false;
+  String? errorMessage;
+
   String selectedDepartment = 'All Departments';
 
-  // Bottom navigation
+  @override
+  void initState() {
+    super.initState();
+
+    // Load local employees immediately.
+    employees = widget.employeeRepo.getEmployees();
+
+    // Fetch API users and combine both lists.
+    fetchEmployees();
+  }
+
+  Future<void> fetchEmployees() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final apiEmployees =
+          await employeeApiRepo.getEmployeesFromApi();
+
+      if (!mounted) return;
+
+      setState(() {
+        // Read the latest local data so newly added employees
+        // are not lost.
+        final localEmployees =
+            widget.employeeRepo.getEmployees();
+
+        employees = [
+          ...localEmployees,
+          ...apiEmployees,
+        ];
+
+        isLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        // Keep local employees visible if the API fails.
+        employees = widget.employeeRepo.getEmployees();
+        errorMessage = 'Could not load API users. Please retry.';
+        isLoading = false;
+      });
+    }
+  }
+
   void handleNavigation(int index) {
     if (index == 0) {
-      // Return to the Dashboard.
       Navigator.popUntil(context, (route) => route.isFirst);
     } else if (index == 1) {
       // Already on the Employees screen.
     } else if (index == 2) {
-      // Open Attendance.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -46,7 +100,6 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
         ),
       );
     } else if (index == 3) {
-      // Open Profile.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -64,13 +117,26 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<EmployeeModel> employees =
-        widget.employeeRepo.getEmployees();
+    final searchText =
+        searchController.text.toLowerCase().trim();
 
-    final List<String> departments = employees
+    final departments = employees
         .map((employee) => employee.department)
         .toSet()
         .toList();
+
+    final filteredEmployees = employees.where((employee) {
+      final matchesSearch =
+          employee.name.toLowerCase().contains(searchText) ||
+          employee.email.toLowerCase().contains(searchText) ||
+          employee.department.toLowerCase().contains(searchText);
+
+      final matchesDepartment =
+          selectedDepartment == 'All Departments' ||
+          employee.department == selectedDepartment;
+
+      return matchesSearch && matchesDepartment;
+    }).toList();
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -85,15 +151,10 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Header.
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              20,
-              20,
-              24,
-            ),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
             decoration: const BoxDecoration(
               color: AppColors.primaryColor,
               borderRadius: BorderRadius.only(
@@ -124,18 +185,16 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
             ),
           ),
 
-          // Search and department filter
+          // Search and department filter.
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              20,
-              16,
-              12,
-            ),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
             child: Column(
               children: [
                 TextField(
                   controller: searchController,
+                  onChanged: (value) {
+                    setState(() {});
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search employees',
                     prefixIcon: const Icon(
@@ -149,9 +208,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                     filled: true,
                     fillColor: AppColors.whiteColor,
                     contentPadding:
-                        const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                        const EdgeInsets.symmetric(vertical: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide.none,
@@ -162,7 +219,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                 const SizedBox(height: 12),
 
                 DropdownButtonFormField<String>(
-                  value: selectedDepartment,
+                  initialValue: selectedDepartment,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Department',
@@ -209,11 +266,9 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
             ),
           ),
 
-          // Employee count
+          // Employee count.
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
                 const Icon(
@@ -223,10 +278,10 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                 ),
                 const SizedBox(width: 8),
                 const Text(
-                  'All Employees',
+                  'All Employees & API Users',
                   style: TextStyle(
                     color: AppColors.primaryColor,
-                    fontSize: 17,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -241,7 +296,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${employees.length} Members',
+                    '${filteredEmployees.length} Members',
                     style: const TextStyle(
                       color: AppColors.primaryColor,
                       fontSize: 12,
@@ -253,11 +308,42 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
-          // Employee list
+          // Loading indicator while local employees remain visible.
+          if (isLoading)
+            const LinearProgressIndicator(),
+
+          // API error message and retry option.
+          if (errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.cloud_off_outlined,
+                    color: AppColors.greyColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      errorMessage!,
+                      style: const TextStyle(
+                        color: AppColors.greyColor,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: fetchEmployees,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+
+          // Combined employee list.
           Expanded(
-            child: employees.isEmpty
+            child: filteredEmployees.isEmpty
                 ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
@@ -278,7 +364,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                           ),
                           const SizedBox(height: 16),
                           const Text(
-                            'No Employees Yet',
+                            'No Employees Found',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -287,7 +373,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            'Add your first employee to get started.',
+                            'Try another search or add an employee.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: AppColors.greyColor,
@@ -299,15 +385,10 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      16,
-                      0,
-                      16,
-                      20,
-                    ),
-                    itemCount: employees.length,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                    itemCount: filteredEmployees.length,
                     itemBuilder: (context, index) {
-                      final employee = employees[index];
+                      final employee = filteredEmployees[index];
 
                       return EmployeeCard(
                         name: employee.name,
@@ -330,7 +411,6 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
         ],
       ),
 
-      // Reusable bottom navigation bar
       bottomNavigationBar: BottomNavBar(
         selectedIndex: 1,
         onItemTapped: handleNavigation,

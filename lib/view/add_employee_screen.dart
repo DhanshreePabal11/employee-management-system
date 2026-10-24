@@ -8,7 +8,6 @@ import '../custom_widgets/custom_text_field.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
 
-
 class AddEmployeeScreen extends StatefulWidget {
   final EmployeeRepo employeeRepo;
 
@@ -30,6 +29,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   final salaryController = TextEditingController();
 
   String? department;
+  bool isSaving = false;
 
   @override
   void dispose() {
@@ -40,10 +40,16 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     super.dispose();
   }
 
-  void saveEmployee() {
+  Future<void> saveEmployee() async {
+    if (isSaving) return;
+
     if (!formKey.currentState!.validate()) {
       return;
     }
+
+    setState(() {
+      isSaving = true;
+    });
 
     final employee = EmployeeModel(
       name: nameController.text.trim(),
@@ -53,15 +59,33 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
       salary: double.parse(salaryController.text.trim()),
     );
 
-    widget.employeeRepo.addEmployee(employee);
+    try {
+      await widget.employeeRepo.addEmployee(employee);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(AppStrings.employeeAdded),
-      ),
-    );
+      if (!mounted) return;
 
-    Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.employeeAdded),
+        ),
+      );
+
+      Navigator.pop(context, true);
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Failed to save employee. Please try again.',
+          ),
+        ),
+      );
+
+      setState(() {
+        isSaving = false;
+      });
+    }
   }
 
   @override
@@ -231,7 +255,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     const SizedBox(height: 18),
 
                     DropdownButtonFormField<String>(
-                      value: department,
+                      initialValue: department,
                       isExpanded: true,
                       decoration: InputDecoration(
                         labelText: AppStrings.department,
@@ -323,7 +347,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
 
                     // Save button
                     CustomButton(
-                      text: 'Save Employee',
+                      text: isSaving ? 'Saving...' : 'Save Employee',
                       onPressed: saveEmployee,
                     ),
 
@@ -334,9 +358,11 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                       width: double.infinity,
                       height: 48,
                       child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: isSaving
+                            ? null
+                            : () {
+                                Navigator.pop(context);
+                              },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primaryColor,
                           side: const BorderSide(

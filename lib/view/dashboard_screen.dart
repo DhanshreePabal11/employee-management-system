@@ -18,15 +18,37 @@ class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() =>
-      _DashboardScreenState();
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final EmployeeRepo employeeRepo = EmployeeRepo();
 
   int selectedIndex = 0;
+  bool isLoading = true;
 
+  @override
+  void initState() {
+    super.initState();
+    loadDashboardData();
+  }
+
+  // Load saved employees when the dashboard opens.
+  Future<void> loadDashboardData() async {
+    try {
+      await employeeRepo.loadEmployees();
+    } catch (error) {
+      debugPrint('Error loading employees: $error');
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  // Open Add Employee screen and refresh the dashboard.
   Future<void> openAddEmployee() async {
     await Navigator.push(
       context,
@@ -37,14 +59,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
 
-
     if (mounted) {
       setState(() {});
     }
   }
 
-  void openEmployeeList() {
-    Navigator.push(
+  // Open Employee List screen and refresh when returning.
+  Future<void> openEmployeeList() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EmployeeListScreen(
@@ -52,6 +74,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void openAttendance() {
@@ -80,6 +106,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
+
+
 
   void handleNavigation(int index) {
     if (index == 0) {
@@ -142,186 +171,192 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Good Morning!',
-              style: TextStyle(
-                fontSize: 23,
-                fontWeight: FontWeight.bold,
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
                 color: AppColors.primaryColor,
               ),
-            ),
-
-            const SizedBox(height: 6),
-
-            const Text(
-              'Here is what is happening in your workplace today.',
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.greyColor,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            const Text(
-              'Workforce Overview',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor,
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            Row(
-              children: [
-                Expanded(
-                  child: SummaryCard(
-                    title: AppStrings.totalEmployees,
-                    value: '${employees.length}',
-                    icon: Icons.groups_rounded,
-                    iconColor: Colors.blue,
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                const Expanded(
-                  child: SummaryCard(
-                    title: AppStrings.presentToday,
-                    value: '0',
-                    icon: Icons.check_circle_outline,
-                    iconColor: AppColors.greenColor,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // On Leave and Departments cards
-            Row(
-              children: [
-                const Expanded(
-                  child: SummaryCard(
-                    title: AppStrings.onLeave,
-                    value: '0',
-                    icon: Icons.event_busy_outlined,
-                    iconColor: AppColors.orangeColor,
-                  ),
-                ),
-
-                const SizedBox(width: 20),
-
-                Expanded(
-                  child: SummaryCard(
-                    title: AppStrings.departments,
-                    value: '$departmentCount',
-                    icon: Icons.business_outlined,
-                    iconColor: Colors.purple,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 28),
-
-            const Text(
-              'Quick Actions',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor,
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: openAddEmployee,
-                    icon: const Icon(
-                      Icons.person_add_alt_1,
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Good Morning!',
+                    style: TextStyle(
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
                     ),
-                    label: const Text(
-                      AppStrings.addEmployee,
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  const Text(
+                    'Here is what is happening in your workplace today.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.greyColor,
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: AppColors.whiteColor,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    'Workforce Overview',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SummaryCard(
+                          title: AppStrings.totalEmployees,
+                          value: '${employees.length}',
+                          icon: Icons.groups_rounded,
+                          iconColor: Colors.blue,
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      const Expanded(
+                        child: SummaryCard(
+                          title: AppStrings.presentToday,
+                          value: '0',
+                          icon: Icons.check_circle_outline,
+                          iconColor: AppColors.greenColor,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: SummaryCard(
+                          title: AppStrings.onLeave,
+                          value: '0',
+                          icon: Icons.event_busy_outlined,
+                          iconColor: AppColors.orangeColor,
+                        ),
+                      ),
+
+                      const SizedBox(width: 20),
+
+                      Expanded(
+                        child: SummaryCard(
+                          title: AppStrings.departments,
+                          value: '$departmentCount',
+                          icon: Icons.business_outlined,
+                          iconColor: Colors.purple,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  const Text(
+                    'Quick Actions',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: openAddEmployee,
+                          icon: const Icon(
+                            Icons.person_add_alt_1,
+                          ),
+                          label: const Text(
+                            AppStrings.addEmployee,
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            foregroundColor: AppColors.whiteColor,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: openEmployeeList,
+                          icon: const Icon(
+                            Icons.people_outline,
+                          ),
+                          label: const Text('View Employees'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primaryColor,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Recent Employees',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+
+                      TextButton(
+                        onPressed: openEmployeeList,
+                        child: const Text('View All'),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  if (employees.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(AppStrings.noEmployees),
+                    )
+                  else
+                    ...employees.take(3).map(
+                      (employee) => EmployeeCard(
+                        name: employee.name,
+                        department: employee.department,
+                        onTap: openEmployeeList,
                       ),
                     ),
-                  ),
-                ),
-                
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: openEmployeeList,
-                    icon: const Icon(
-                      Icons.people_outline,
-                    ),
-                    label: const Text('View Employees'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryColor,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 28),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recent Employees',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-
-                TextButton(
-                  onPressed: openEmployeeList,
-                  child: const Text('View All'),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            if (employees.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(AppStrings.noEmployees),
-              )
-            else
-              ...employees.take(3).map(
-                (employee) => EmployeeCard(
-                  name: employee.name,
-                  department: employee.department,
-                  onTap: openEmployeeList,
-                ),
+                ],
               ),
-          ],
-        ),
-      ),
+            ),
 
       bottomNavigationBar: BottomNavBar(
         selectedIndex: selectedIndex,
