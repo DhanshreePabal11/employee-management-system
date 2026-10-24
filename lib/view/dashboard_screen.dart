@@ -82,7 +82,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void handleNavigation(int index) {
     if (index == 0) {
-      // Already on Dashboard.
       setState(() {
         selectedIndex = 0;
       });
@@ -155,6 +154,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: AppColors.primaryColor,
               ),
             ),
+
             const SizedBox(height: 6),
 
             const Text(
@@ -164,6 +164,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: AppColors.greyColor,
               ),
             ),
+
             const SizedBox(height: 24),
 
             const Text(
@@ -174,6 +175,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: AppColors.primaryColor,
               ),
             ),
+
             const SizedBox(height: 14),
 
             Row(
@@ -186,7 +188,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     iconColor: Colors.blue,
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 const Expanded(
                   child: SummaryCard(
                     title: AppStrings.presentToday,
@@ -197,8 +201,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
+
             const SizedBox(height: 12),
 
+            // On Leave and Departments cards
             Row(
               children: [
                 const Expanded(
@@ -209,6 +215,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     iconColor: AppColors.orangeColor,
                   ),
                 ),
+
+                const SizedBox(width: 20),
+
                 Expanded(
                   child: SummaryCard(
                     title: AppStrings.departments,
@@ -219,6 +228,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
+
             const SizedBox(height: 28),
 
             const Text(
@@ -229,6 +239,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: AppColors.primaryColor,
               ),
             ),
+
             const SizedBox(height: 14),
 
             Row(
@@ -243,17 +254,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       AppStrings.addEmployee,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          AppColors.primaryColor,
-                      foregroundColor:
-                          AppColors.whiteColor,
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: AppColors.whiteColor,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
                       ),
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: openEmployeeList,
@@ -262,8 +273,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     label: const Text('View Employees'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor:
-                          AppColors.primaryColor,
+                      foregroundColor: AppColors.primaryColor,
                       padding: const EdgeInsets.symmetric(
                         vertical: 16,
                       ),
@@ -272,11 +282,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
+
             const SizedBox(height: 28),
 
             Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
                   'Recent Employees',
@@ -286,12 +296,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: AppColors.primaryColor,
                   ),
                 ),
+
                 TextButton(
                   onPressed: openEmployeeList,
                   child: const Text('View All'),
                 ),
               ],
             ),
+
             const SizedBox(height: 8),
 
             if (employees.isEmpty)

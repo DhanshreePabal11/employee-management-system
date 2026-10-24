@@ -6,33 +6,25 @@ import '../constants/app_strings.dart';
 import '../custom_widgets/bottom_nav_bar.dart';
 import 'attendence_screen.dart';
 
-
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   void handleNavigation(BuildContext context, int index) {
     if (index == 0) {
-      // Return to Dashboard.
       Navigator.popUntil(context, (route) => route.isFirst);
     } else if (index == 1) {
-      // Open Employees.
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Open Employees from the Dashboard for now.',
-          ),
+          content: Text('Open Employees from the Dashboard for now.'),
         ),
       );
     } else if (index == 2) {
-      // Open Attendance.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const AttendenceScreen(),
         ),
       );
-    } else if (index == 3) {
-      // Already on Profile.
     }
   }
 
@@ -45,74 +37,164 @@ class ProfileScreen extends StatelessWidget {
         title: const Text(AppStrings.profile),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
+        elevation: 0,
       ),
 
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              // Profile picture
-              const CircleAvatar(
-                radius: 50,
-                backgroundColor: AppColors.lightBlueColor,
-                child: Icon(
-                  Icons.person,
-                  size: 55,
-                  color: AppColors.primaryColor,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Compact Profile Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 16,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 32,
+                    backgroundColor: AppColors.whiteColor,
+                    child: Icon(
+                      Icons.person_outline,
+                      size: 36,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  const Text(
+                    'Admin User',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.whiteColor,
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.whiteColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Administrator',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.whiteColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'Account Information',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            profileCard(
+              icon: Icons.person_outline,
+              title: 'Full Name',
+              value: 'Admin User',
+            ),
+
+            profileCard(
+              icon: Icons.email_outlined,
+              title: 'Email Address',
+              value: 'admin@example.com',
+            ),
+
+            profileCard(
+              icon: Icons.work_outline,
+              title: 'Role',
+              value: 'Administrator',
+            ),
+
+            const SizedBox(height: 8),
+
+            // Application Information
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppColors.borderColor,
                 ),
               ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightBlueColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.business_outlined,
+                      color: AppColors.primaryColor,
+                      size: 24,
+                    ),
+                  ),
 
-              const SizedBox(height: 18),
+                  const SizedBox(width: 12),
 
-              // User name
-              const Text(
-                'Admin User',
-                style: TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor,
-                ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Application',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.greyColor,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        Text(
+                          AppStrings.appName,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 6),
-
-              const Text(
-                'Administrator',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppColors.greyColor,
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
-              // User email
-              profileCard(
-                Icons.email_outlined,
-                'Email',
-                'admin@example.com',
-              ),
-
-              // User role
-              profileCard(
-                Icons.work_outline,
-                'Role',
-                'Administrator',
-              ),
-
-              // Application name
-              profileCard(
-                Icons.business_outlined,
-                'Application',
-                AppStrings.appName,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
 
-      // Bottom navigation
       bottomNavigationBar: BottomNavBar(
         selectedIndex: 3,
         onItemTapped: (index) {
@@ -122,16 +204,16 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Displays one profile detail
-  Widget profileCard(
-    IconData icon,
-    String title,
-    String value,
-  ) {
+  // Reusable Profile Information Card
+  Widget profileCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
@@ -141,13 +223,20 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: AppColors.primaryColor,
-            size: 26,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.lightBlueColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.primaryColor,
+              size: 23,
+            ),
           ),
 
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
 
           Expanded(
             child: Column(
@@ -156,8 +245,8 @@ class ProfileScreen extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
+                    fontSize: 12,
                     color: AppColors.greyColor,
-                    fontSize: 13,
                   ),
                 ),
 
@@ -166,7 +255,7 @@ class ProfileScreen extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryColor,
                   ),
