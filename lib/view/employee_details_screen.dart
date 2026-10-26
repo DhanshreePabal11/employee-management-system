@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../model/employee_model.dart';
+import '../repo/employee_api_repo.dart';
 import 'edit_employee_screen.dart';
 
-class EmployeeDetailScreen extends StatelessWidget {
+class EmployeeDetailScreen extends StatefulWidget {
   final EmployeeModel employee;
 
   const EmployeeDetailScreen({
@@ -14,7 +15,121 @@ class EmployeeDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<EmployeeDetailScreen> createState() =>
+      _EmployeeDetailScreenState();
+}
+
+class _EmployeeDetailScreenState
+    extends State<EmployeeDetailScreen> {
+  final EmployeeApiRepo employeeApiRepo = EmployeeApiRepo();
+
+  bool isDeleting = false;
+
+  Future<void> deleteEmployee() async {
+    if (isDeleting) return;
+
+    if (widget.employee.id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Employee ID is not available.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Ask for confirmation before deleting.
+    final confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Employee'),
+          content: Text(
+            'Are you sure you want to delete '
+            '${widget.employee.name}?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete != true || !mounted) return;
+
+    setState(() {
+      isDeleting = true;
+    });
+
+    try {
+      final success =
+          await employeeApiRepo.deleteEmployeeFromApi(
+        widget.employee.id!,
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+        // Return to the employee list after successful deletion.
+        Navigator.pop(context, true);
+      }
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        isDeleting = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete employee: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> editEmployee() async {
+    if (widget.employee.id == null) return;
+
+    final updatedEmployee =
+        await Navigator.push<EmployeeModel>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditEmployeeScreen(
+          employee: widget.employee,
+          employeeId: widget.employee.id!,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (updatedEmployee != null) {
+      // Return updated employee to the employee list.
+      Navigator.pop(context, updatedEmployee);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final employee = widget.employee;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
@@ -36,7 +151,9 @@ class EmployeeDetailScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
+
             const SizedBox(height: 16),
+
             Text(
               employee.name,
               textAlign: TextAlign.center,
@@ -46,7 +163,9 @@ class EmployeeDetailScreen extends StatelessWidget {
                 color: AppColors.primaryColor,
               ),
             ),
+
             const SizedBox(height: 6),
+
             Text(
               employee.department,
               style: const TextStyle(
@@ -54,6 +173,7 @@ class EmployeeDetailScreen extends StatelessWidget {
                 color: AppColors.greyColor,
               ),
             ),
+
             const SizedBox(height: 28),
 
             _buildDetail(
@@ -61,16 +181,19 @@ class EmployeeDetailScreen extends StatelessWidget {
               'Email Address',
               employee.email,
             ),
+
             _buildDetail(
               Icons.phone_outlined,
               'Phone Number',
               employee.phone,
             ),
+
             _buildDetail(
               Icons.business_outlined,
               'Department',
               employee.department,
             ),
+
             _buildDetail(
               Icons.currency_rupee,
               'Monthly Salary',
@@ -79,33 +202,15 @@ class EmployeeDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 28),
 
+            // Edit button.
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: employee.id == null
+                onPressed: isDeleting ||
+                        employee.id == null
                     ? null
-                    : () async {
-                        final updatedEmployee =
-                            await Navigator.push<EmployeeModel>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                EditEmployeeScreen(
-                              employee: employee,
-                              employeeId: employee.id!,
-                            ),
-                          ),
-                        );
-
-                        if (updatedEmployee != null &&
-                            context.mounted) {
-                          Navigator.pop(
-                            context,
-                            updatedEmployee,
-                          );
-                        }
-                      },
+                    : editEmployee,
                 icon: const Icon(Icons.edit),
                 label: const Text(
                   'Edit Employee',
@@ -124,12 +229,56 @@ class EmployeeDetailScreen extends StatelessWidget {
               ),
             ),
 
+            const SizedBox(height: 12),
+
+            // Delete button.
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: isDeleting ||
+                        employee.id == null
+                    ? null
+                    : deleteEmployee,
+                icon: isDeleting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.delete_outline),
+                label: Text(
+                  isDeleting
+                      ? 'Deleting...'
+                      : 'Delete Employee',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+
             if (employee.id == null) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               const Text(
-                'This employee does not have an API ID, so API editing is unavailable.',
+                'This employee has no API ID. '
+                'Editing and deleting are unavailable.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.greyColor),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.greyColor,
+                ),
               ),
             ],
           ],
@@ -156,7 +305,7 @@ class EmployeeDetailScreen extends StatelessWidget {
           Icon(
             icon,
             color: AppColors.primaryColor,
-            size: 25,
+            size: 24,
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -172,10 +321,11 @@ class EmployeeDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  value.isEmpty ? 'Not provided' : value,
+                  value,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.primaryColor,
                   ),
                 ),
               ],

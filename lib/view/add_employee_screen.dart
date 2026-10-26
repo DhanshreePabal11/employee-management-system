@@ -64,42 +64,22 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         salary: double.parse(salaryController.text.trim()),
       );
 
-      // Step 1: Save the employee locally.
-      await widget.employeeRepo.addEmployee(employee);
+      // Save the employee through FastAPI to MySQL.
+      await employeeApiRepo.addEmployeeToApi(employee);
 
       if (!mounted) return;
 
-      // Step 2: Send the employee to the dummy POST API.
-      bool apiSuccess = false;
-
-      try {
-        apiSuccess =
-            await employeeApiRepo.addEmployeeToApi(employee);
-      } catch (error) {
-        debugPrint('Dummy POST API failed: $error');
-      }
-
-      if (!mounted) return;
-
-      // Step 3: Display the result.
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            apiSuccess
-                ? 'Employee saved locally and sent to dummy API!'
-                : 'Employee saved locally, but the API request failed.',
-          ),
-          backgroundColor:
-              apiSuccess ? Colors.green : Colors.orange,
-          duration: const Duration(seconds: 4),
+        const SnackBar(
+          content: Text('Employee added successfully!'),
+          backgroundColor: Colors.green,
         ),
       );
 
-      // Return to the previous screen.
+      // Return to the previous screen and request a refresh.
       Navigator.pop(context, true);
-    } catch (error, stackTrace) {
-      debugPrint('Failed to save employee locally: $error');
-      debugPrintStack(stackTrace: stackTrace);
+    } catch (error) {
+      debugPrint('Failed to add employee: $error');
 
       if (!mounted) return;
 
@@ -109,9 +89,11 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to save employee: $error'),
+          content: Text(
+            'Could not save employee. $error',
+          ),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 8),
+          duration: const Duration(seconds: 5),
         ),
       );
     }
@@ -376,11 +358,10 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     const SizedBox(height: 28),
 
                     // Save employee button.
-                   // Save employee button.
-                     CustomButton(
-                      text: isSaving ? 'Saving...' : 'Save Employee',
-                      onPressed: saveEmployee,
-                      ),
+                 CustomButton(
+  text: isSaving ? 'Saving...' : 'Save Employee',
+  onPressed: saveEmployee,
+),
                     const SizedBox(height: 12),
 
                     // Cancel button.

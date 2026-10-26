@@ -46,12 +46,18 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
   void initState() {
     super.initState();
 
-    nameController =
-        TextEditingController(text: widget.employee.name);
-    emailController =
-        TextEditingController(text: widget.employee.email);
-    phoneController =
-        TextEditingController(text: widget.employee.phone);
+    nameController = TextEditingController(
+      text: widget.employee.name,
+    );
+
+    emailController = TextEditingController(
+      text: widget.employee.email,
+    );
+
+    phoneController = TextEditingController(
+      text: widget.employee.phone,
+    );
+
     salaryController = TextEditingController(
       text: widget.employee.salary.toString(),
     );
@@ -69,6 +75,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
     emailController.dispose();
     phoneController.dispose();
     salaryController.dispose();
+
     super.dispose();
   }
 
@@ -100,6 +107,14 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
       if (!mounted) return;
 
       if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Employee updated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Return the updated employee to the details screen.
         Navigator.pop(context, updatedEmployee);
       }
     } catch (error) {
@@ -143,7 +158,9 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                   color: AppColors.primaryColor,
                 ),
               ),
+
               const SizedBox(height: 8),
+
               const Text(
                 'Edit the information below and save your changes.',
                 style: TextStyle(
@@ -151,6 +168,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                   color: AppColors.greyColor,
                 ),
               ),
+
               const SizedBox(height: 24),
 
               _buildTextField(
@@ -158,6 +176,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                 label: 'Full Name',
                 icon: Icons.person_outline,
               ),
+
               _buildTextField(
                 controller: emailController,
                 label: 'Email Address',
@@ -168,19 +187,33 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                     return 'Please enter email address';
                   }
 
-                  if (!value.contains('@') ||
-                      !value.contains('.')) {
+                  if (!RegExp(
+                    r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                  ).hasMatch(value.trim())) {
                     return 'Please enter a valid email address';
                   }
 
                   return null;
                 },
               ),
+
               _buildTextField(
                 controller: phoneController,
                 label: 'Phone Number',
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter phone number';
+                  }
+
+                  if (!RegExp(r'^[0-9]{10}$')
+                      .hasMatch(value.trim())) {
+                    return 'Enter a valid 10-digit phone number';
+                  }
+
+                  return null;
+                },
               ),
 
               const SizedBox(height: 8),
@@ -216,6 +249,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please select a department';
                   }
+
                   return null;
                 },
               ),
@@ -235,7 +269,8 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                     return 'Please enter salary';
                   }
 
-                  final salary = double.tryParse(value.trim());
+                  final salary =
+                      double.tryParse(value.trim());
 
                   if (salary == null || salary < 0) {
                     return 'Please enter a valid salary';
@@ -251,8 +286,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed:
-                      isUpdating ? null : updateEmployee,
+                  onPressed: isUpdating ? null : updateEmployee,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
                     foregroundColor: AppColors.whiteColor,
@@ -276,6 +310,21 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: isUpdating
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                        },
+                  child: const Text('Cancel'),
                 ),
               ),
             ],
@@ -315,6 +364,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter $label';
               }
+
               return null;
             },
       ),

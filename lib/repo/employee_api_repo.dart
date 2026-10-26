@@ -5,9 +5,9 @@ import 'package:http/http.dart' as http;
 import '../model/employee_model.dart';
 
 class EmployeeApiRepo {
-  final String baseUrl = 'https://jsonplaceholder.typicode.com/users';
+  final String baseUrl = 'http://127.0.0.1:8000/employees';
 
-  // GET API: Fetch employees
+  // GET API: Fetch all employees
   Future<List<EmployeeModel>> getEmployeesFromApi() async {
     final url = Uri.parse(baseUrl);
 
@@ -17,19 +17,19 @@ class EmployeeApiRepo {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        return data.map((user) {
+        return data.map((item) {
           return EmployeeModel(
-            id: (user['id'] as num).toInt(),
-            name: user['name']?.toString() ?? '',
-            email: user['email']?.toString() ?? '',
-            phone: user['phone']?.toString() ?? '',
-            department: 'General',
-            salary: 0.0,
+            id: (item['id'] as num).toInt(),
+            name: item['name']?.toString() ?? '',
+            email: item['email']?.toString() ?? '',
+            phone: item['phone']?.toString() ?? '',
+            department: item['department']?.toString() ?? '',
+            salary: (item['salary'] as num?)?.toDouble() ?? 0.0,
           );
         }).toList();
       } else {
         throw Exception(
-          'Failed to load employees. Status code: ${response.statusCode}',
+          'Failed to fetch employees: ${response.statusCode}',
         );
       }
     } catch (error) {
@@ -43,19 +43,23 @@ class EmployeeApiRepo {
 
     final response = await http.post(
       url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(employee.toJson()),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': employee.name,
+        'email': employee.email,
+        'phone': employee.phone,
+        'department': employee.department,
+        'salary': employee.salary,
+      }),
     );
 
-    if (response.statusCode == 201) {
-      print('Employee added successfully to dummy API');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('Employee added successfully!');
       print(response.body);
       return true;
     } else {
       throw Exception(
-        'Failed to add employee. Status code: ${response.statusCode}',
+        'Failed to add employee: ${response.body}',
       );
     }
   }
@@ -69,19 +73,39 @@ class EmployeeApiRepo {
 
     final response = await http.put(
       url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(employee.toJson()),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': employee.name,
+        'email': employee.email,
+        'phone': employee.phone,
+        'department': employee.department,
+        'salary': employee.salary,
+      }),
     );
 
     if (response.statusCode == 200) {
-      print('Employee updated successfully in dummy API');
+      print('Employee updated successfully!');
       print(response.body);
       return true;
     } else {
       throw Exception(
-        'Failed to update employee. Status code: ${response.statusCode}',
+        'Failed to update employee: ${response.body}',
+      );
+    }
+  }
+
+  // DELETE API: Delete employee
+  Future<bool> deleteEmployeeFromApi(int employeeId) async {
+    final url = Uri.parse('$baseUrl/$employeeId');
+
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      print('Employee deleted successfully!');
+      return true;
+    } else {
+      throw Exception(
+        'Failed to delete employee: ${response.body}',
       );
     }
   }
