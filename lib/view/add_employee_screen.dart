@@ -7,6 +7,7 @@ import '../custom_widgets/custom_button.dart';
 import '../custom_widgets/custom_text_field.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
+import '../repo/employee_api_repo.dart';
 
 class AddEmployeeScreen extends StatefulWidget {
   final EmployeeRepo employeeRepo;
@@ -17,7 +18,8 @@ class AddEmployeeScreen extends StatefulWidget {
   });
 
   @override
-  State<AddEmployeeScreen> createState() => _AddEmployeeScreenState();
+  State<AddEmployeeScreen> createState() =>
+      _AddEmployeeScreenState();
 }
 
 class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
@@ -27,6 +29,8 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final salaryController = TextEditingController();
+
+  final EmployeeApiRepo employeeApiRepo = EmployeeApiRepo();
 
   String? department;
   bool isSaving = false;
@@ -51,40 +55,65 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
       isSaving = true;
     });
 
-    final employee = EmployeeModel(
-      name: nameController.text.trim(),
-      email: emailController.text.trim(),
-      phone: phoneController.text.trim(),
-      department: department!,
-      salary: double.parse(salaryController.text.trim()),
-    );
-
     try {
+      final employee = EmployeeModel(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+        phone: phoneController.text.trim(),
+        department: department!,
+        salary: double.parse(salaryController.text.trim()),
+      );
+
+      // Step 1: Save the employee locally.
       await widget.employeeRepo.addEmployee(employee);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.employeeAdded),
-        ),
-      );
+      // Step 2: Send the employee to the dummy POST API.
+      bool apiSuccess = false;
 
-      Navigator.pop(context, true);
-    } catch (error) {
+      try {
+        apiSuccess =
+            await employeeApiRepo.addEmployeeToApi(employee);
+      } catch (error) {
+        debugPrint('Dummy POST API failed: $error');
+      }
+
       if (!mounted) return;
 
+      // Step 3: Display the result.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Failed to save employee. Please try again.',
+            apiSuccess
+                ? 'Employee saved locally and sent to dummy API!'
+                : 'Employee saved locally, but the API request failed.',
           ),
+          backgroundColor:
+              apiSuccess ? Colors.green : Colors.orange,
+          duration: const Duration(seconds: 4),
         ),
       );
+
+      // Return to the previous screen.
+      Navigator.pop(context, true);
+    } catch (error, stackTrace) {
+      debugPrint('Failed to save employee locally: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
 
       setState(() {
         isSaving = false;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save employee: $error'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 8),
+        ),
+      );
     }
   }
 
@@ -102,7 +131,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header section
+            // Header section.
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
@@ -159,7 +188,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Personal information section
+                    // Personal information.
                     const Row(
                       children: [
                         Icon(
@@ -204,8 +233,9 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                           return 'Enter email';
                         }
 
-                        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                            .hasMatch(value.trim())) {
+                        if (!RegExp(
+                          r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                        ).hasMatch(value.trim())) {
                           return 'Enter a valid email';
                         }
 
@@ -233,7 +263,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
 
                     const SizedBox(height: 28),
 
-                    // Work information section
+                    // Work information.
                     const Row(
                       children: [
                         Icon(
@@ -345,15 +375,15 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
 
                     const SizedBox(height: 28),
 
-                    // Save button
-                    CustomButton(
+                    // Save employee button.
+                   // Save employee button.
+                     CustomButton(
                       text: isSaving ? 'Saving...' : 'Save Employee',
                       onPressed: saveEmployee,
-                    ),
-
+                      ),
                     const SizedBox(height: 12),
 
-                    // Cancel button
+                    // Cancel button.
                     SizedBox(
                       width: double.infinity,
                       height: 48,

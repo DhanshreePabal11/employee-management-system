@@ -1,5 +1,6 @@
 
 class EmployeeModel {
+  final int? id;
   final String name;
   final String email;
   final String phone;
@@ -7,6 +8,7 @@ class EmployeeModel {
   final double salary;
 
   EmployeeModel({
+    this.id,
     required this.name,
     required this.email,
     required this.phone,
@@ -14,7 +16,7 @@ class EmployeeModel {
     required this.salary,
   });
 
-  // Convert an employee object into JSON.
+  // Convert employee data into JSON.
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -25,14 +27,22 @@ class EmployeeModel {
     };
   }
 
-  // Convert saved JSON back into an employee object.
+  // Convert JSON into an employee object.
   factory EmployeeModel.fromJson(Map<String, dynamic> json) {
     return EmployeeModel(
-      name: json['name'] as String,
-      email: json['email'] as String,
-      phone: json['phone'] as String,
-      department: json['department'] as String,
-      salary: (json['salary'] as num).toDouble(),
+      id: json['id'] == null
+          ? null
+          : (json['id'] as num).toInt(),
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      department: json['department']?.toString() ?? 'General',
+      salary: json['salary'] is num
+          ? (json['salary'] as num).toDouble()
+          : double.tryParse(
+                json['salary']?.toString() ?? '',
+              ) ??
+              0.0,
     );
   }
 }
