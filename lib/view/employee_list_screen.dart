@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../custom_widgets/employee_card.dart';
+import '../custom_widgets/bottom_nav_bar.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
 import '../repo/employee_api_repo.dart';
@@ -10,6 +11,9 @@ import '../repo/employee_api_repo.dart';
 import 'add_employee_screen.dart';
 import 'employee_details_screen.dart';
 import 'dashboard_screen.dart';
+import 'attendence_screen.dart';
+import 'attendence_reports_screen.dart';
+import 'profile_screen.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   final EmployeeRepo employeeRepo;
@@ -24,7 +28,8 @@ class EmployeeListScreen extends StatefulWidget {
       _EmployeeListScreenState();
 }
 
-class _EmployeeListScreenState extends State<EmployeeListScreen> {
+class _EmployeeListScreenState
+    extends State<EmployeeListScreen> {
   final EmployeeApiRepo employeeApiRepo = EmployeeApiRepo();
 
   final TextEditingController searchController =
@@ -91,17 +96,42 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
     }
   }
 
-  // Return to Dashboard.
-  void goToDashboard() {
+  // Navigate between bottom navigation tabs.
+  void navigateToScreen(int index) {
+    if (index == 1) return;
+
+    late final Widget screen;
+
+    switch (index) {
+      case 0:
+        screen = const DashboardScreen();
+        break;
+
+      case 2:
+        screen = const AttendenceScreen();
+        break;
+
+      case 3:
+        screen = const AttendenceReportsScreen();
+        break;
+
+      case 4:
+        screen = const ProfileScreen();
+        break;
+
+      default:
+        return;
+    }
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const DashboardScreen(),
+        builder: (context) => screen,
       ),
     );
   }
 
-  // Open the Add Employee screen.
+  // Open Add Employee screen.
   Future<void> openAddEmployeeScreen() async {
     final result = await Navigator.push<bool>(
       context,
@@ -119,7 +149,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
     }
   }
 
-  // Open employee details and refresh the list on return.
+  // Open employee details.
   Future<void> openEmployeeDetails(
     EmployeeModel employee,
   ) async {
@@ -163,12 +193,11 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
 
-      // AppBar with back arrow and refresh button.
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           tooltip: 'Back to Dashboard',
-          onPressed: goToDashboard,
+          onPressed: () => navigateToScreen(0),
         ),
         title: const Text('Employee List'),
         backgroundColor: AppColors.primaryColor,
@@ -181,15 +210,6 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
             tooltip: 'Refresh employees',
           ),
         ],
-      ),
-
-      // Add Employee button.
-      floatingActionButton: FloatingActionButton(
-        onPressed: openAddEmployeeScreen,
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: AppColors.whiteColor,
-        tooltip: 'Add Employee',
-        child: const Icon(Icons.add),
       ),
 
       body: Column(
@@ -320,18 +340,16 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                               color: AppColors.greyColor,
                             ),
                             const SizedBox(height: 16),
-                            Center(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                ),
-                                child: Text(
-                                  errorMessage!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: AppColors.greyColor,
-                                  ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              child: Text(
+                                errorMessage!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: AppColors.greyColor,
                                 ),
                               ),
                             ),
@@ -418,6 +436,21 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
             ),
           ),
         ],
+      ),
+
+      // Floating Add Employee button.
+      floatingActionButton: FloatingActionButton(
+        onPressed: openAddEmployeeScreen,
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: AppColors.whiteColor,
+        tooltip: 'Add Employee',
+        child: const Icon(Icons.add),
+      ),
+
+      // Fixed bottom navigation bar.
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: 1,
+        onItemTapped: navigateToScreen,
       ),
     );
   }
