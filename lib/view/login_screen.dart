@@ -5,6 +5,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
 import '../custom_widgets/custom_button.dart';
 import '../custom_widgets/custom_text_field.dart';
+import '../model/user_session.dart';
 import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -31,6 +32,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void login() {
     if (formKey.currentState!.validate()) {
+      // Save the entered email for the Profile screen.
+      UserSession.email = emailController.text.trim();
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -44,15 +48,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-
             child: Form(
               key: formKey,
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -61,12 +62,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Container(
                       height: 76,
                       width: 76,
-
                       decoration: BoxDecoration(
                         color: AppColors.primaryColor,
                         borderRadius: BorderRadius.circular(22),
                       ),
-
                       child: const Icon(
                         Icons.groups_rounded,
                         size: 42,
@@ -180,7 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         size: 18,
                       ),
                       label: Text(
-                        isPasswordVisible ? 'Hide Password' : 'Show Password',
+                        isPasswordVisible
+                            ? 'Hide Password'
+                            : 'Show Password',
                       ),
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.primaryColor,
