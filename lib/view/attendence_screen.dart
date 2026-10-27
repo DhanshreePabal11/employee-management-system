@@ -6,6 +6,7 @@ import '../constants/app_strings.dart';
 import '../custom_widgets/bottom_nav_bar.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_api_repo.dart';
+import '../repo/attendance_api_repo.dart';
 import 'profile_screen.dart';
 
 class AttendenceScreen extends StatefulWidget {
@@ -17,42 +18,77 @@ class AttendenceScreen extends StatefulWidget {
 
 class _AttendenceScreenState extends State<AttendenceScreen> {
   final EmployeeApiRepo employeeApiRepo = EmployeeApiRepo();
+  final AttendanceApiRepo attendanceApiRepo = AttendanceApiRepo();
 
   DateTime selectedDate = DateTime.now();
 
   List<EmployeeModel> employees = [];
 
-  // Attendance is held in memory until backend integration.
+  // Employee ID -> attendance status
   final Map<int, String> attendance = {};
 
+  // Employee ID -> saved attendance record ID
+  final Map<int, int> attendanceRecordIds = {};
+
   bool isLoading = true;
+  bool isSaving = false;
   String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    fetchEmployees();
+    fetchData();
   }
 
-  Future<void> fetchEmployees() async {
+  String get formattedDate {
+    final year = selectedDate.year.toString();
+    final month = selectedDate.month.toString().padLeft(2, '0');
+    final day = selectedDate.day.toString().padLeft(2, '0');
+
+    return '$year-$month-$day';
+  }
+
+  String get displayDate {
+    return '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}';
+  }
+
+  // Load employees and attendance for the selected date.
+  Future<void> fetchData() async {
     setState(() {
       isLoading = true;
       errorMessage = null;
     });
 
     try {
-      final result = await employeeApiRepo.getEmployeesFromApi();
+      final employeeResult =
+          await employeeApiRepo.getEmployeesFromApi();
+
+      final attendanceResult =
+          await attendanceApiRepo.getAttendance(formattedDate);
 
       if (!mounted) return;
 
       setState(() {
-        employees = result;
+        employees = employeeResult;
 
-        // Default employees to Present until a status is selected.
+        // Start with Present as the default for employees
+        // who have no saved record for this date.
+        attendance.clear();
+        attendanceRecordIds.clear();
+
         for (final employee in employees) {
           if (employee.id != null) {
-            attendance.putIfAbsent(employee.id!, () => 'Present');
+            attendance[employee.id!] = 'Present';
           }
+        }
+
+        // Replace defaults with saved backend records.
+        for (final record in attendanceResult) {
+          final employeeId = (record['employee_id'] as num).toInt();
+          final recordId = (record['id'] as num).toInt();
+
+          attendance[employeeId] = record['status'].toString();
+          attendanceRecordIds[employeeId] = recordId;
         }
 
         isLoading = false;
@@ -61,9 +97,11 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
       if (!mounted) return;
 
       setState(() {
-        errorMessage = 'Unable to load employees. Check your API connection.';
+        errorMessage = 'Unable to load data. Check your API connection.';
         isLoading = false;
       });
+
+      debugPrint('Failed to load attendance: $error');
     }
   }
 
@@ -79,6 +117,8 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
       setState(() {
         selectedDate = date;
       });
+
+      await fetchData();
     }
   }
 
@@ -86,6 +126,87 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
     setState(() {
       attendance[employeeId] = status;
     });
+  }
+
+  // Save new records or update existing records.
+  Future<void> saveAttendance() async {
+    if (isSaving || isLoading) return;
+
+    if (employees.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No employees available.')),
+      );
+      return;
+    }
+
+    setState(() {
+      isSaving = true;
+    });
+
+    try {
+      for (final employee in employees) {
+        final employeeId = employee.id;
+
+        if (employeeId == null) continue;
+
+        final status = attendance[employeeId] ?? 'Present';
+        final existingRecordId = attendanceRecordIds[employeeId];
+
+        Map<String, dynamic> savedRecord;
+
+        if (existingRecordId != null) {
+          // Update the saved attendance record.
+          savedRecord = await attendanceApiRepo.updateAttendance(
+            attendanceId: existingRecordId,
+            employeeId: employeeId,
+            date: formattedDate,
+            status: status,
+          );
+        } else {
+          // Create a new attendance record.
+          savedRecord = await attendanceApiRepo.addAttendance(
+            employeeId: employeeId,
+            date: formattedDate,
+            status: status,
+          );
+        }
+
+        // Keep the generated record ID for future updates.
+        attendanceRecordIds[employeeId] =
+            (savedRecord['id'] as num).toInt();
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Attendance saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      debugPrint('Failed to save attendance: $error');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save attendance: $error'),
+          backgroundColor: AppColors.redColor,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+
+      // Reload the backend state, including any records saved
+      // before a later request failed.
+      await fetchData();
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSaving = false;
+        });
+      }
+    }
   }
 
   int get presentCount =>
@@ -127,14 +248,14 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: fetchEmployees,
+            onPressed: isLoading || isSaving ? null : fetchData,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh employees',
+            tooltip: 'Refresh attendance',
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: fetchEmployees,
+        onRefresh: fetchData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(20),
@@ -159,7 +280,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Date selector.
+              // Date selector
               InkWell(
                 onTap: selectDate,
                 borderRadius: BorderRadius.circular(14),
@@ -192,7 +313,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                              displayDate,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -287,7 +408,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
                       ),
                       const SizedBox(height: 12),
                       ElevatedButton(
-                        onPressed: fetchEmployees,
+                        onPressed: fetchData,
                         child: const Text('Try Again'),
                       ),
                     ],
@@ -321,17 +442,22 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Attendance is not saved yet. Backend integration is the next step.',
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text('Save Attendance'),
+                  onPressed: isLoading || isSaving || errorMessage != null
+                      ? null
+                      : saveAttendance,
+                  icon: isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(
+                    isSaving ? 'Saving Attendance...' : 'Save Attendance',
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
                     foregroundColor: AppColors.whiteColor,
@@ -484,7 +610,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
     required VoidCallback onPressed,
   }) {
     return OutlinedButton(
-      onPressed: onPressed,
+      onPressed: isSaving ? null : onPressed,
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(
           horizontal: 4,
