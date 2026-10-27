@@ -2,29 +2,64 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_strings.dart';
 import '../custom_widgets/bottom_nav_bar.dart';
+import '../repo/employee_repo.dart';
+
+import 'dashboard_screen.dart';
+import 'employee_list_screen.dart';
 import 'attendence_screen.dart';
+import 'attendence_reports_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  void goToDashboard(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const DashboardScreen(),
+      ),
+    );
+  }
+
   void handleNavigation(BuildContext context, int index) {
-    if (index == 0) {
-      Navigator.popUntil(context, (route) => route.isFirst);
-    } else if (index == 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Open Employees from the Dashboard for now.'),
-        ),
-      );
-    } else if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AttendenceScreen(),
-        ),
-      );
+    switch (index) {
+      case 0:
+        goToDashboard(context);
+        break;
+
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EmployeeListScreen(
+              employeeRepo: EmployeeRepo(),
+            ),
+          ),
+        );
+        break;
+
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AttendenceScreen(),
+          ),
+        );
+        break;
+
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AttendenceReportsScreen(),
+          ),
+        );
+        break;
+
+      case 4:
+        // Already on Profile.
+        break;
     }
   }
 
@@ -32,69 +67,77 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-
       appBar: AppBar(
-        title: const Text(AppStrings.profile),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back to Dashboard',
+          onPressed: () => goToDashboard(context),
+        ),
+        title: const Text('My Profile'),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
         elevation: 0,
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Compact Profile Header
+            // Profile header.
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 16,
-              ),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor,
+                color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.borderColor,
+                ),
               ),
               child: Column(
                 children: [
                   const CircleAvatar(
-                    radius: 32,
-                    backgroundColor: AppColors.whiteColor,
+                    radius: 45,
+                    backgroundColor: AppColors.lightBlueColor,
                     child: Icon(
-                      Icons.person_outline,
-                      size: 36,
+                      Icons.person,
+                      size: 48,
                       color: AppColors.primaryColor,
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-
+                  const SizedBox(height: 16),
                   const Text(
                     'Admin User',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.whiteColor,
+                      color: AppColors.primaryColor,
                     ),
                   ),
-
-                  const SizedBox(height: 5),
-
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Administrator',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.greyColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
+                      horizontal: 14,
+                      vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.whiteColor.withValues(alpha: 0.15),
+                      color: AppColors.lightBlueColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
-                      'Administrator',
+                      'Admin Account',
                       style: TextStyle(
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.w600,
                         fontSize: 12,
-                        color: AppColors.whiteColor,
                       ),
                     ),
                   ),
@@ -102,10 +145,10 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             const Text(
-              'Account Information',
+              'Personal Information',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -115,29 +158,42 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            profileCard(
+            _buildInfoCard(
               icon: Icons.person_outline,
               title: 'Full Name',
               value: 'Admin User',
             ),
 
-            profileCard(
+            const SizedBox(height: 12),
+
+            _buildInfoCard(
               icon: Icons.email_outlined,
               title: 'Email Address',
               value: 'admin@example.com',
             ),
 
-            profileCard(
+            const SizedBox(height: 12),
+
+            _buildInfoCard(
               icon: Icons.work_outline,
               title: 'Role',
               value: 'Administrator',
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 28),
 
-            // Application Information
+            const Text(
+              'Account',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
             Container(
-              width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
@@ -146,47 +202,40 @@ class ProfileScreen extends StatelessWidget {
                   color: AppColors.borderColor,
                 ),
               ),
-              child: Row(
+              child: const Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.lightBlueColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.business_outlined,
-                      color: AppColors.primaryColor,
-                      size: 24,
-                    ),
+                  Icon(
+                    Icons.security_outlined,
+                    color: AppColors.primaryColor,
+                    size: 26,
                   ),
-
-                  const SizedBox(width: 12),
-
+                  SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Application',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.greyColor,
-                          ),
-                        ),
-
-                        const SizedBox(height: 5),
-
                         Text(
-                          AppStrings.appName,
-                          style: const TextStyle(
+                          'Account Security',
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primaryColor,
                           ),
                         ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Your account settings and access.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.greyColor,
+                          ),
+                        ),
                       ],
                     ),
+                  ),
+                  Icon(
+                    Icons.verified_user_outlined,
+                    color: AppColors.greenColor,
                   ),
                 ],
               ),
@@ -194,9 +243,8 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
       ),
-
       bottomNavigationBar: BottomNavBar(
-        selectedIndex: 3,
+        selectedIndex: 4,
         onItemTapped: (index) {
           handleNavigation(context, index);
         },
@@ -204,16 +252,13 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Reusable Profile Information Card
-  Widget profileCard({
+  Widget _buildInfoCard({
     required IconData icon,
     required String title,
     required String value,
   }) {
     return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14),
@@ -224,7 +269,7 @@ class ProfileScreen extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(11),
             decoration: BoxDecoration(
               color: AppColors.lightBlueColor,
               borderRadius: BorderRadius.circular(10),
@@ -235,9 +280,7 @@ class ProfileScreen extends StatelessWidget {
               size: 23,
             ),
           ),
-
-          const SizedBox(width: 12),
-
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,13 +292,11 @@ class ProfileScreen extends StatelessWidget {
                     color: AppColors.greyColor,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryColor,
                   ),

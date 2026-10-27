@@ -43,40 +43,55 @@ class _AttendenceReportsScreenState
     loadReports();
   }
 
+  // Navigate directly to Dashboard.
+  void goToDashboard() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DashboardScreen(),
+      ),
+    );
+  }
+
   // Navigate between the five bottom navigation tabs.
   void handleNavigation(int index) {
-    if (index == 0) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
-      );
-    } else if (index == 1) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EmployeeListScreen(
-            employeeRepo: employeeRepo,
+    switch (index) {
+      case 0:
+        goToDashboard();
+        break;
+
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmployeeListScreen(
+              employeeRepo: employeeRepo,
+            ),
           ),
-        ),
-      );
-    } else if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AttendenceScreen(),
-        ),
-      );
-    } else if (index == 3) {
-      // Reports is already open.
-    } else if (index == 4) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ProfileScreen(),
-        ),
-      );
+        );
+        break;
+
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AttendenceScreen(),
+          ),
+        );
+        break;
+
+      case 3:
+        // Already on Reports screen.
+        break;
+
+      case 4:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ProfileScreen(),
+          ),
+        );
+        break;
     }
   }
 
@@ -91,6 +106,8 @@ class _AttendenceReportsScreenState
 
   // Load monthly attendance from the API.
   Future<void> loadReports() async {
+    if (!mounted) return;
+
     setState(() {
       isLoading = true;
       errorMessage = null;
@@ -141,6 +158,8 @@ class _AttendenceReportsScreenState
         isLoading = false;
       });
     } catch (error) {
+      debugPrint('Attendance report error: $error');
+
       if (!mounted) return;
 
       setState(() {
@@ -148,8 +167,6 @@ class _AttendenceReportsScreenState
         errorMessage =
             'Could not load reports. Check your backend and try again.';
       });
-
-      debugPrint('Attendance report error: $error');
     }
   }
 
@@ -401,8 +418,12 @@ class _AttendenceReportsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back to Dashboard',
+          onPressed: goToDashboard,
+        ),
         title: const Text(AppStrings.attendanceReports),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
@@ -415,7 +436,6 @@ class _AttendenceReportsScreenState
           ),
         ],
       ),
-
       body: isLoading
           ? const Center(
               child: CircularProgressIndicator(
@@ -718,8 +738,6 @@ class _AttendenceReportsScreenState
                     ),
                   ),
                 ),
-
-      // Fixed bottom navigation bar.
       bottomNavigationBar: BottomNavBar(
         selectedIndex: 3,
         onItemTapped: handleNavigation,

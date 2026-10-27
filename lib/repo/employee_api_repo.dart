@@ -1,5 +1,7 @@
 
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/employee_model.dart';
@@ -7,42 +9,67 @@ import '../model/employee_model.dart';
 class EmployeeApiRepo {
   final String baseUrl = 'http://127.0.0.1:8000/employees';
 
-  // GET API: Fetch all employees
+  // GET API: Fetch all employees.
   Future<List<EmployeeModel>> getEmployeesFromApi() async {
-    final url = Uri.parse(baseUrl);
-
     try {
-      final response = await http.get(url);
+      final response = await http.get(Uri.parse(baseUrl));
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-
-        return data.map((item) {
-          return EmployeeModel(
-            id: (item['id'] as num).toInt(),
-            name: item['name']?.toString() ?? '',
-            email: item['email']?.toString() ?? '',
-            phone: item['phone']?.toString() ?? '',
-            department: item['department']?.toString() ?? '',
-            salary: (item['salary'] as num?)?.toDouble() ?? 0.0,
-          );
-        }).toList();
-      } else {
+      if (response.statusCode != 200) {
         throw Exception(
-          'Failed to fetch employees: ${response.statusCode}',
+          'Failed to fetch employees: '
+          '${response.statusCode} ${response.body}',
         );
       }
+
+      final dynamic decoded = jsonDecode(response.body);
+      dynamic data = decoded;
+
+      // Support a direct list or a list inside an object.
+      if (decoded is Map) {
+        data = decoded['employees'] ?? decoded['data'];
+      }
+
+      if (data is! List) {
+        throw const FormatException(
+          'Expected a list of employees from the API.',
+        );
+      }
+
+      return data.map<EmployeeModel>((item) {
+        if (item is! Map) {
+          throw const FormatException(
+            'Invalid employee record received from API.',
+          );
+        }
+
+        final json = Map<String, dynamic>.from(item);
+
+        return EmployeeModel(
+          id: json['id'] == null
+              ? null
+              : (json['id'] as num).toInt(),
+          name: json['name']?.toString() ?? '',
+          email: json['email']?.toString() ?? '',
+          phone: json['phone']?.toString() ?? '',
+          department: json['department']?.toString() ?? '',
+          salary: json['salary'] is num
+              ? (json['salary'] as num).toDouble()
+              : double.tryParse(
+                    json['salary']?.toString() ?? '',
+                  ) ??
+                  0.0,
+        );
+      }).toList();
     } catch (error) {
-      throw Exception('Error fetching employees: $error');
+      debugPrint('Employee API error: $error');
+      rethrow;
     }
   }
 
-  // POST API: Add employee
+  // POST API: Add employee.
   Future<bool> addEmployeeToApi(EmployeeModel employee) async {
-    final url = Uri.parse(baseUrl);
-
     final response = await http.post(
-      url,
+      Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'name': employee.name,
@@ -53,26 +80,22 @@ class EmployeeApiRepo {
       }),
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print('Employee added successfully!');
-      print(response.body);
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+      debugPrint('Employee added successfully.');
       return true;
-    } else {
-      throw Exception(
-        'Failed to add employee: ${response.body}',
-      );
     }
+
+    throw Exception('Failed to add employee: ${response.body}');
   }
 
-  // PUT API: Update employee
+  // PUT API: Update employee.
   Future<bool> updateEmployeeInApi(
     int employeeId,
     EmployeeModel employee,
   ) async {
-    final url = Uri.parse('$baseUrl/$employeeId');
-
     final response = await http.put(
-      url,
+      Uri.parse('$baseUrl/$employeeId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'name': employee.name,
@@ -84,29 +107,25 @@ class EmployeeApiRepo {
     );
 
     if (response.statusCode == 200) {
-      print('Employee updated successfully!');
-      print(response.body);
+      debugPrint('Employee updated successfully.');
       return true;
-    } else {
-      throw Exception(
-        'Failed to update employee: ${response.body}',
-      );
     }
+
+    throw Exception('Failed to update employee: ${response.body}');
   }
 
-  // DELETE API: Delete employee
+  // DELETE API: Delete employee.
   Future<bool> deleteEmployeeFromApi(int employeeId) async {
-    final url = Uri.parse('$baseUrl/$employeeId');
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$employeeId'),
+    );
 
-    final response = await http.delete(url);
-
-    if (response.statusCode == 200) {
-      print('Employee deleted successfully!');
+    if (response.statusCode == 200 ||
+        response.statusCode == 204) {
+      debugPrint('Employee deleted successfully.');
       return true;
-    } else {
-      throw Exception(
-        'Failed to delete employee: ${response.body}',
-      );
     }
+
+    throw Exception('Failed to delete employee: ${response.body}');
   }
 }

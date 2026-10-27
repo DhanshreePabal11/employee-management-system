@@ -2,21 +2,16 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_strings.dart';
-import '../custom_widgets/summary_card.dart';
-import '../custom_widgets/employee_card.dart';
-import '../custom_widgets/bottom_nav_bar.dart';
-import '../model/employee_model.dart';
-import '../repo/employee_repo.dart';
 import '../repo/employee_api_repo.dart';
-import '../repo/attendance_api_repo.dart';
+import '../repo/employee_repo.dart';
+import '../model/employee_model.dart';
+import '../custom_widgets/bottom_nav_bar.dart';
 
-import 'add_employee_screen.dart';
 import 'employee_list_screen.dart';
 import 'attendence_screen.dart';
 import 'attendence_reports_screen.dart';
 import 'profile_screen.dart';
-import 'activity_history_screen.dart';
+import 'add_employee_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -26,16 +21,10 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final EmployeeRepo employeeRepo = EmployeeRepo();
   final EmployeeApiRepo employeeApiRepo = EmployeeApiRepo();
-  final AttendanceApiRepo attendanceApiRepo = AttendanceApiRepo();
+  final EmployeeRepo employeeRepo = EmployeeRepo();
 
   List<EmployeeModel> employees = [];
-
-  int selectedIndex = 0;
-  int presentCount = 0;
-  int onLeaveCount = 0;
-
   bool isLoading = true;
   String? errorMessage;
 
@@ -45,434 +34,452 @@ class _DashboardScreenState extends State<DashboardScreen> {
     loadDashboardData();
   }
 
-  // Load real employees and today's attendance from the API.
   Future<void> loadDashboardData() async {
-    if (mounted) {
+    try {
+      final data = await employeeApiRepo.getEmployeesFromApi();
+
+      if (!mounted) return;
+
       setState(() {
-        isLoading = true;
+        employees = data;
+        isLoading = false;
         errorMessage = null;
       });
-    }
-
-    try {
-      final List<EmployeeModel> apiEmployees =
-          await employeeApiRepo.getEmployeesFromApi();
-
-      final DateTime today = DateTime.now();
-
-      final String todayDate =
-          '${today.year}-'
-          '${today.month.toString().padLeft(2, '0')}-'
-          '${today.day.toString().padLeft(2, '0')}';
-
-      final records =
-          await attendanceApiRepo.getAttendance(todayDate);
-
-      int present = 0;
-      int onLeave = 0;
-
-      for (final record in records) {
-        final String status =
-            (record['status'] ?? '')
-                .toString()
-                .trim()
-                .toLowerCase();
-
-        if (status == 'present') {
-          present++;
-        } else if (status == 'on leave') {
-          onLeave++;
-        }
-      }
-
-      if (!mounted) return;
-
-      setState(() {
-        employees = apiEmployees;
-        presentCount = present;
-        onLeaveCount = onLeave;
-        isLoading = false;
-      });
     } catch (error) {
-      debugPrint('Dashboard API error: $error');
+      debugPrint('Dashboard loading error: $error');
 
       if (!mounted) return;
 
       setState(() {
-        errorMessage = error.toString();
         isLoading = false;
+        errorMessage = 'Could not load employees. Please try again.';
       });
     }
   }
 
-  // Open Add Employee screen.
-  Future<void> openAddEmployee() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddEmployeeScreen(
-          employeeRepo: employeeRepo,
-        ),
-      ),
-    );
-
-    if (mounted) {
-      await loadDashboardData();
-    }
-  }
-
-  // Open Employee List screen.
-  Future<void> openEmployeeList() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EmployeeListScreen(
-          employeeRepo: employeeRepo,
-        ),
-      ),
-    );
-
-    if (mounted) {
-      await loadDashboardData();
-    }
-  }
-
-  // Open Attendance screen.
-  Future<void> openAttendance() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const AttendenceScreen(),
-      ),
-    );
-
-    if (mounted) {
-      await loadDashboardData();
-    }
-  }
-
-  // Open Attendance Reports screen.
-  Future<void> openAttendanceReports() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const AttendenceReportsScreen(),
-      ),
-    );
-
-    if (mounted) {
-      await loadDashboardData();
-    }
-  }
-
-  // Open Profile screen.
-  void openProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ProfileScreen(),
-      ),
-    );
-  }
-
-  // Open Activity History screen.
-  void openActivityHistory() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ActivityHistoryScreen(),
-      ),
-    );
-  }
-
-  // Handle bottom navigation.
   void handleNavigation(int index) {
-    if (index == 0) {
-      setState(() {
-        selectedIndex = 0;
-      });
-      loadDashboardData();
-    } else if (index == 1) {
-      openEmployeeList();
-    } else if (index == 2) {
-      openAttendance();
-    } else if (index == 3) {
-      openAttendanceReports();
-    } else if (index == 4) {
-      openProfile();
+    switch (index) {
+      case 0:
+        // Already on Dashboard.
+        break;
+
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EmployeeListScreen(
+              employeeRepo: employeeRepo,
+            ),
+          ),
+        );
+        break;
+
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AttendenceScreen(),
+          ),
+        );
+        break;
+
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AttendenceReportsScreen(),
+          ),
+        );
+        break;
+
+      case 4:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ProfileScreen(),
+          ),
+        );
+        break;
     }
+  }
+
+  void openEmployees() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EmployeeListScreen(
+          employeeRepo: employeeRepo,
+        ),
+      ),
+    );
+  }
+
+  void openAddEmployee() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddEmployeeScreen(
+          employeeRepo: employeeRepo,
+        ),
+      ),
+    ).then((_) {
+      loadDashboardData();
+    });
+  }
+
+  Widget buildSummaryCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 14),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.greyColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildQuickAction({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.whiteColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderColor),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                icon,
+                size: 28,
+                color: AppColors.primaryColor,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.greyColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildEmployeeTile(EmployeeModel employee) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: AppColors.lightBlueColor,
+            child: Text(
+              employee.name.isNotEmpty
+                  ? employee.name[0].toUpperCase()
+                  : '?',
+              style: const TextStyle(
+                color: AppColors.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  employee.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  employee.department,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.greyColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: AppColors.greyColor,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final Set<String> departments = employees
-        .map((employee) => employee.department.trim())
-        .where((department) => department.isNotEmpty)
-        .toSet();
+    final departmentNames = <String>{};
 
-    final int departmentCount = departments.length;
+    for (final employee in employees) {
+      if (employee.department.trim().isNotEmpty) {
+        departmentNames.add(employee.department.trim());
+      }
+    }
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
+        title: const Text('Employee Portal'),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppStrings.dashboard,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              AppStrings.dashboardSubtitle,
-              style: TextStyle(fontSize: 12),
-            ),
-          ],
-        ),
+        elevation: 0,
         actions: [
           IconButton(
-            onPressed: openActivityHistory,
-            icon: const Icon(Icons.notifications_none),
-            tooltip: 'Activity History',
+            onPressed: isLoading ? null : loadDashboardData,
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh dashboard',
           ),
-          IconButton(
-            onPressed: openProfile,
-            icon: const Icon(Icons.account_circle_outlined),
-            tooltip: 'Profile',
-          ),
-          const SizedBox(width: 8),
         ],
       ),
-
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
+      body: RefreshIndicator(
+        onRefresh: loadDashboardData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Welcome Back!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor,
+                ),
               ),
-            )
-          : errorMessage != null
-              ? Center(
+              const SizedBox(height: 6),
+              const Text(
+                'Here is your employee management overview.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.greyColor,
+                ),
+              ),
+
+              const SizedBox(height: 26),
+
+              const Text(
+                'Workforce Overview',
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              if (isLoading)
+                const Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.cloud_off_outlined,
-                          size: 48,
-                          color: AppColors.greyColor,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Could not load dashboard data.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          errorMessage!,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: loadDashboardData,
-                          child: const Text('Retry'),
-                        ),
-                      ],
+                    padding: EdgeInsets.all(24),
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryColor,
                     ),
                   ),
                 )
-              : RefreshIndicator(
-                  onRefresh: loadDashboardData,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              else if (errorMessage != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        errorMessage!,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: loadDashboardData,
+                        child: const Text('Try Again'),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    Row(
                       children: [
-                        const Text(
-                          'Good Morning!',
-                          style: TextStyle(
-                            fontSize: 23,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: buildSummaryCard(
+                            title: 'Total Employees',
+                            value: '${employees.length}',
+                            icon: Icons.groups_2_rounded,
                             color: AppColors.primaryColor,
                           ),
                         ),
-
-                        const SizedBox(height: 6),
-
-                        const Text(
-                          'Here is what is happening in your workplace today.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.greyColor,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: buildSummaryCard(
+                            title: 'Departments',
+                            value: '${departmentNames.length}',
+                            icon: Icons.apartment_rounded,
+                            color: AppColors.greenColor,
                           ),
                         ),
-
-                        const SizedBox(height: 24),
-
-                        const Text(
-                          'Workforce Overview',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SummaryCard(
-                                title: AppStrings.totalEmployees,
-                                value: '${employees.length}',
-                                icon: Icons.groups_rounded,
-                                iconColor: Colors.blue,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: SummaryCard(
-                                title: AppStrings.presentToday,
-                                value: '$presentCount',
-                                icon: Icons.check_circle_outline,
-                                iconColor: AppColors.greenColor,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SummaryCard(
-                                title: AppStrings.onLeave,
-                                value: '$onLeaveCount',
-                                icon: Icons.event_busy_outlined,
-                                iconColor: AppColors.orangeColor,
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: SummaryCard(
-                                title: AppStrings.departments,
-                                value: '$departmentCount',
-                                icon: Icons.business_outlined,
-                                iconColor: Colors.purple,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 28),
-
-                        const Text(
-                          'Quick Actions',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: openAddEmployee,
-                                icon: const Icon(
-                                  Icons.person_add_alt_1,
-                                ),
-                                label: const Text(
-                                  AppStrings.addEmployee,
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      AppColors.primaryColor,
-                                  foregroundColor:
-                                      AppColors.whiteColor,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: openEmployeeList,
-                                icon: const Icon(
-                                  Icons.people_outline,
-                                ),
-                                label: const Text('View Employees'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor:
-                                      AppColors.primaryColor,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 28),
-
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Recent Employees',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryColor,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: openEmployeeList,
-                              child: const Text('View All'),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        if (employees.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text(AppStrings.noEmployees),
-                          )
-                        else
-                          ...employees.take(3).map(
-                            (employee) => EmployeeCard(
-                              name: employee.name,
-                              department: employee.department,
-                              onTap: openEmployeeList,
-                            ),
-                          ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
 
+              const SizedBox(height: 28),
+
+              const Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildQuickAction(
+                    title: 'Add Employee',
+                    subtitle: 'Register a new employee',
+                    icon: Icons.person_add_alt_rounded,
+                    onTap: openAddEmployee,
+                  ),
+                  const SizedBox(width: 12),
+                  buildQuickAction(
+                    title: 'View Employees',
+                    subtitle: 'Manage employee details',
+                    icon: Icons.groups_2_rounded,
+                    onTap: openEmployees,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 28),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Recent Employees',
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: openEmployees,
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              if (isLoading)
+                const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryColor,
+                  ),
+                )
+              else if (employees.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'No employees found.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.greyColor,
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    for (int i = 0;
+                        i < employees.length && i < 5;
+                        i++)
+                      buildEmployeeTile(employees[i]),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
       bottomNavigationBar: BottomNavBar(
-        selectedIndex: selectedIndex,
+        selectedIndex: 0,
         onItemTapped: handleNavigation,
       ),
     );

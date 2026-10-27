@@ -6,8 +6,10 @@ import '../custom_widgets/employee_card.dart';
 import '../model/employee_model.dart';
 import '../repo/employee_repo.dart';
 import '../repo/employee_api_repo.dart';
+
 import 'add_employee_screen.dart';
 import 'employee_details_screen.dart';
+import 'dashboard_screen.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   final EmployeeRepo employeeRepo;
@@ -77,6 +79,8 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
         isLoading = false;
       });
     } catch (error) {
+      debugPrint('Employee loading error: $error');
+
       if (!mounted) return;
 
       setState(() {
@@ -85,6 +89,16 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
         isLoading = false;
       });
     }
+  }
+
+  // Return to Dashboard.
+  void goToDashboard() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DashboardScreen(),
+      ),
+    );
   }
 
   // Open the Add Employee screen.
@@ -125,7 +139,8 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
   // Search and department filter.
   List<EmployeeModel> get filteredEmployees {
-    final searchText = searchController.text.toLowerCase().trim();
+    final searchText =
+        searchController.text.toLowerCase().trim();
 
     return employees.where((employee) {
       final matchesSearch =
@@ -147,19 +162,28 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+
+      // AppBar with back arrow and refresh button.
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back to Dashboard',
+          onPressed: goToDashboard,
+        ),
         title: const Text('Employee List'),
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.whiteColor,
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: fetchEmployees,
+            onPressed: isLoading ? null : fetchEmployees,
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh employees',
           ),
         ],
       ),
+
+      // Add Employee button.
       floatingActionButton: FloatingActionButton(
         onPressed: openAddEmployeeScreen,
         backgroundColor: AppColors.primaryColor,
@@ -167,6 +191,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
         tooltip: 'Add Employee',
         child: const Icon(Icons.add),
       ),
+
       body: Column(
         children: [
           // Search field.
