@@ -12,15 +12,14 @@ from employee_model import Employee
 from attendance_model import Attendance
 
 
-# Create database tables
+
 Base.metadata.create_all(bind=engine)
 
 
-# Create FastAPI application
+
 app = FastAPI(title="Employee Management API")
 
 
-# Enable CORS for Flutter
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -30,7 +29,6 @@ app.add_middleware(
 )
 
 
-# ---------------- EMPLOYEE SCHEMAS ----------------
 
 class EmployeeCreate(BaseModel):
     name: str
@@ -45,7 +43,7 @@ class EmployeeResponse(EmployeeCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
-# ---------------- ATTENDANCE SCHEMAS ----------------
+
 
 AttendanceStatus = Literal["Present", "Absent", "On Leave"]
 
@@ -61,16 +59,13 @@ class AttendanceResponse(AttendanceCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
-# ---------------- HOME API ----------------
+ 
 
 @app.get("/")
 def home():
     return {"message": "Employee Management API is running!"}
 
-
-# ==================================================
-#                  EMPLOYEE APIs
-# ==================================================
+ 
 
 # CREATE EMPLOYEE
 @app.post("/employees", response_model=EmployeeResponse)
@@ -175,7 +170,7 @@ def delete_employee(
             detail="Employee not found"
         )
 
-    # Remove attendance records before deleting the employee
+   
     db.query(Attendance).filter(
         Attendance.employee_id == employee_id
     ).delete(synchronize_session=False)
@@ -186,17 +181,14 @@ def delete_employee(
     return {"message": "Employee deleted successfully"}
 
 
-# ==================================================
-#                 ATTENDANCE APIs
-# ==================================================
-
-# SAVE ATTENDANCE
+ 
+ 
 @app.post("/attendance", response_model=AttendanceResponse)
 def create_attendance(
     attendance_data: AttendanceCreate,
     db: Session = Depends(get_db)
-):
-    # Check whether the employee exists
+): 
+    
     employee = db.query(Employee).filter(
         Employee.id == attendance_data.employee_id
     ).first()
@@ -207,7 +199,7 @@ def create_attendance(
             detail="Employee not found"
         )
 
-    # Check for an existing record for this employee and date
+  
     existing = db.query(Attendance).filter(
         Attendance.employee_id == attendance_data.employee_id,
         Attendance.date == attendance_data.date
@@ -232,7 +224,7 @@ def create_attendance(
     return new_attendance
 
 
-# GET ATTENDANCE FOR A SELECTED DATE
+ 
 @app.get("/attendance", response_model=list[AttendanceResponse])
 def get_attendance(
     attendance_date: date,
@@ -244,8 +236,7 @@ def get_attendance(
 
     return records
 
-
-# UPDATE ATTENDANCE
+ 
 @app.put("/attendance/{attendance_id}", response_model=AttendanceResponse)
 def update_attendance(
     attendance_id: int,
@@ -262,7 +253,7 @@ def update_attendance(
             detail="Attendance record not found"
         )
 
-    # Check whether the employee exists
+    
     employee = db.query(Employee).filter(
         Employee.id == updated_data.employee_id
     ).first()
@@ -273,7 +264,7 @@ def update_attendance(
             detail="Employee not found"
         )
 
-    # Check for duplicate attendance on the same date
+     
     duplicate = db.query(Attendance).filter(
         Attendance.employee_id == updated_data.employee_id,
         Attendance.date == updated_data.date,
@@ -296,7 +287,7 @@ def update_attendance(
     return attendance
 
 
-# DELETE ATTENDANCE
+ 
 @app.delete("/attendance/{attendance_id}")
 def delete_attendance(
     attendance_id: int,

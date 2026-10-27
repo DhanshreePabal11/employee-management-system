@@ -38,7 +38,7 @@ class _EmployeeDetailScreenState
       return;
     }
 
-    // Ask for confirmation before deleting.
+
     final confirmDelete = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -85,7 +85,7 @@ class _EmployeeDetailScreenState
       if (!mounted) return;
 
       if (success) {
-        // Return to the employee list after successful deletion.
+      
         Navigator.pop(context, true);
       }
     } catch (error) {
@@ -121,7 +121,7 @@ class _EmployeeDetailScreenState
     if (!mounted) return;
 
     if (updatedEmployee != null) {
-      // Return updated employee to the employee list.
+     
       Navigator.pop(context, updatedEmployee);
     }
   }
@@ -202,7 +202,7 @@ class _EmployeeDetailScreenState
 
             const SizedBox(height: 28),
 
-            // Edit button.
+         
             SizedBox(
               width: double.infinity,
               height: 50,

@@ -114,7 +114,7 @@ class _EditEmployeeScreenState extends State<EditEmployeeScreen> {
           ),
         );
 
-        // Return the updated employee to the details screen.
+       
         Navigator.pop(context, updatedEmployee);
       }
     } catch (error) {

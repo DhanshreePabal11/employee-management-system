@@ -43,7 +43,7 @@ class _AttendenceReportsScreenState
     loadReports();
   }
 
-  // Navigate directly to Dashboard.
+
   void goToDashboard() {
     Navigator.pushReplacement(
       context,
@@ -53,7 +53,7 @@ class _AttendenceReportsScreenState
     );
   }
 
-  // Navigate between the five bottom navigation tabs.
+
   void handleNavigation(int index) {
     switch (index) {
       case 0:
@@ -81,7 +81,7 @@ class _AttendenceReportsScreenState
         break;
 
       case 3:
-        // Already on Reports screen.
+    
         break;
 
       case 4:
@@ -95,7 +95,6 @@ class _AttendenceReportsScreenState
     }
   }
 
-  // Format date as yyyy-MM-dd for the API.
   String formatDate(DateTime date) {
     final year = date.year.toString();
     final month = date.month.toString().padLeft(2, '0');
@@ -104,7 +103,7 @@ class _AttendenceReportsScreenState
     return '$year-$month-$day';
   }
 
-  // Load monthly attendance from the API.
+
   Future<void> loadReports() async {
     if (!mounted) return;
 
@@ -170,7 +169,7 @@ class _AttendenceReportsScreenState
     }
   }
 
-  // Count attendance statuses.
+  
   int get presentCount => attendanceRecords
       .where((record) => record['status'] == 'Present')
       .length;
@@ -190,7 +189,7 @@ class _AttendenceReportsScreenState
     return (presentCount / totalRecords) * 100;
   }
 
-  // Display the selected month.
+ 
   String get monthLabel {
     const months = [
       'January',
@@ -210,7 +209,6 @@ class _AttendenceReportsScreenState
     return '${months[selectedMonth.month - 1]} ${selectedMonth.year}';
   }
 
-  // Open the month selector.
   Future<void> selectMonth() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -233,7 +231,7 @@ class _AttendenceReportsScreenState
     await loadReports();
   }
 
-  // Find employee name using employee ID.
+
   String employeeName(int employeeId) {
     for (final employee in employees) {
       if (employee.id == employeeId) {
@@ -244,7 +242,7 @@ class _AttendenceReportsScreenState
     return 'Employee #$employeeId';
   }
 
-  // Set a color for each attendance status.
+
   Color statusColor(String status) {
     switch (status) {
       case 'Present':
@@ -258,7 +256,7 @@ class _AttendenceReportsScreenState
     }
   }
 
-  // Display a status percentage bar.
+ 
   Widget buildDistributionRow(
     String title,
     int count,
@@ -303,7 +301,7 @@ class _AttendenceReportsScreenState
     );
   }
 
-  // Display the saved attendance records.
+ 
   Widget buildReportDetails() {
     if (attendanceRecords.isEmpty) {
       return const Padding(
@@ -494,7 +492,7 @@ class _AttendenceReportsScreenState
                         ),
                         const SizedBox(height: 22),
 
-                        // Month selector.
+                      
                         InkWell(
                           onTap: selectMonth,
                           borderRadius: BorderRadius.circular(14),

@@ -60,7 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void handleNavigation(int index) {
     switch (index) {
       case 0:
-        // Already on Dashboard.
+      
         break;
 
       case 1:

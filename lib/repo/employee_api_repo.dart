@@ -9,7 +9,7 @@ import '../model/employee_model.dart';
 class EmployeeApiRepo {
   final String baseUrl = 'http://127.0.0.1:8000/employees';
 
-  // GET API: Fetch all employees.
+  // GET API
   Future<List<EmployeeModel>> getEmployeesFromApi() async {
     try {
       final response = await http.get(Uri.parse(baseUrl));
@@ -24,7 +24,7 @@ class EmployeeApiRepo {
       final dynamic decoded = jsonDecode(response.body);
       dynamic data = decoded;
 
-      // Support a direct list or a list inside an object.
+     
       if (decoded is Map) {
         data = decoded['employees'] ?? decoded['data'];
       }
@@ -66,7 +66,7 @@ class EmployeeApiRepo {
     }
   }
 
-  // POST API: Add employee.
+  // POST API
   Future<bool> addEmployeeToApi(EmployeeModel employee) async {
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -89,7 +89,7 @@ class EmployeeApiRepo {
     throw Exception('Failed to add employee: ${response.body}');
   }
 
-  // PUT API: Update employee.
+  // PUT API
   Future<bool> updateEmployeeInApi(
     int employeeId,
     EmployeeModel employee,
@@ -114,7 +114,7 @@ class EmployeeApiRepo {
     throw Exception('Failed to update employee: ${response.body}');
   }
 
-  // DELETE API: Delete employee.
+  // DELETE API
   Future<bool> deleteEmployeeFromApi(int employeeId) async {
     final response = await http.delete(
       Uri.parse('$baseUrl/$employeeId'),

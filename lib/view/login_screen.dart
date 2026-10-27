@@ -32,7 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void login() {
     if (formKey.currentState!.validate()) {
-      // Save the entered email for the Profile screen.
       UserSession.email = emailController.text.trim();
 
       Navigator.pushReplacement(
@@ -57,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // App icon
+                  
                   Center(
                     child: Container(
                       height: 76,
@@ -76,7 +75,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 28),
 
-                  // Welcome heading
                   const Center(
                     child: Text(
                       'Welcome Back',
@@ -103,7 +101,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 36),
 
-                  // Email field
                   const Text(
                     AppStrings.email,
                     style: TextStyle(
@@ -134,7 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Password heading
                   const Text(
                     AppStrings.password,
                     style: TextStyle(
@@ -144,7 +140,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 8),
 
-                  // Password field
                   CustomTextField(
                     controller: passwordController,
                     label: 'Enter your password',
@@ -163,7 +158,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
 
-                  // Show or hide password
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
@@ -191,7 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Login button
                   CustomButton(
                     text: 'Sign In',
                     onPressed: login,
@@ -199,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
-                  // App name
+                
                   const Center(
                     child: Text(
                       AppStrings.appName,

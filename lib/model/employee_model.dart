@@ -16,7 +16,7 @@ class EmployeeModel {
     required this.salary,
   });
 
-  // Convert employee data into JSON.
+ 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -26,8 +26,7 @@ class EmployeeModel {
       'salary': salary,
     };
   }
-
-  // Convert JSON into an employee object.
+ 
   factory EmployeeModel.fromJson(Map<String, dynamic> json) {
     return EmployeeModel(
       id: json['id'] == null

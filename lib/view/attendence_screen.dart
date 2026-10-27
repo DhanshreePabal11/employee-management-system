@@ -213,7 +213,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
     }
   }
 
-  // Back arrow action: return to Dashboard.
+
   void goToDashboard() {
     Navigator.pushReplacement(
       context,
@@ -223,7 +223,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
     );
   }
 
-  // Navigation for all five bottom tabs.
+
   void handleNavigation(int index) {
     switch (index) {
       case 0:
@@ -242,7 +242,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
         break;
 
       case 2:
-        // Already on Attendance.
+       
         break;
 
       case 3:
@@ -478,7 +478,7 @@ class _AttendenceScreenState extends State<AttendenceScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        // Added back arrow to return to Dashboard.
+     
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           tooltip: 'Back to Dashboard',

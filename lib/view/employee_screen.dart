@@ -46,7 +46,6 @@ class EmployeeScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Employee portal banner
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -102,7 +101,6 @@ class EmployeeScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // Add employee feature
             featureCard(
               Icons.person_add_alt_1,
               AppStrings.addEmployee,
@@ -110,7 +108,6 @@ class EmployeeScreen extends StatelessWidget {
               AppColors.primaryColor,
             ),
 
-            // Employee list feature
             featureCard(
               Icons.people_outline,
               'Employee Directory',
@@ -118,7 +115,6 @@ class EmployeeScreen extends StatelessWidget {
               AppColors.greenColor,
             ),
 
-            // Employee details feature
             featureCard(
               Icons.badge_outlined,
               AppStrings.employeeDetails,
@@ -130,8 +126,6 @@ class EmployeeScreen extends StatelessWidget {
       ),
     );
   }
-
-  // Creates one feature card
   Widget featureCard(
     IconData icon,
     String title,

@@ -53,7 +53,7 @@ class ActivityHistoryScreen extends StatelessWidget {
     );
   }
 
-  // Displays one activity
+
   Widget activityCard({
     required IconData icon,
     required String title,

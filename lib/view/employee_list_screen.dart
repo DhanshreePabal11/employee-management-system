@@ -96,7 +96,6 @@ class _EmployeeListScreenState
     }
   }
 
-  // Navigate between bottom navigation tabs.
   void navigateToScreen(int index) {
     if (index == 1) return;
 
@@ -131,7 +130,6 @@ class _EmployeeListScreenState
     );
   }
 
-  // Open Add Employee screen.
   Future<void> openAddEmployeeScreen() async {
     final result = await Navigator.push<bool>(
       context,
@@ -149,7 +147,6 @@ class _EmployeeListScreenState
     }
   }
 
-  // Open employee details.
   Future<void> openEmployeeDetails(
     EmployeeModel employee,
   ) async {
@@ -167,7 +164,6 @@ class _EmployeeListScreenState
     await fetchEmployees();
   }
 
-  // Search and department filter.
   List<EmployeeModel> get filteredEmployees {
     final searchText =
         searchController.text.toLowerCase().trim();
@@ -214,7 +210,6 @@ class _EmployeeListScreenState
 
       body: Column(
         children: [
-          // Search field.
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
@@ -247,7 +242,6 @@ class _EmployeeListScreenState
             ),
           ),
 
-          // Department filter.
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -283,7 +277,6 @@ class _EmployeeListScreenState
             ),
           ),
 
-          // Employee count.
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
@@ -309,7 +302,6 @@ class _EmployeeListScreenState
             ),
           ),
 
-          // Employee list, loading state, or error.
           Expanded(
             child: RefreshIndicator(
               onRefresh: fetchEmployees,
@@ -438,7 +430,6 @@ class _EmployeeListScreenState
         ],
       ),
 
-      // Floating Add Employee button.
       floatingActionButton: FloatingActionButton(
         onPressed: openAddEmployeeScreen,
         backgroundColor: AppColors.primaryColor,
@@ -447,7 +438,6 @@ class _EmployeeListScreenState
         child: const Icon(Icons.add),
       ),
 
-      // Fixed bottom navigation bar.
       bottomNavigationBar: BottomNavBar(
         selectedIndex: 1,
         onItemTapped: navigateToScreen,

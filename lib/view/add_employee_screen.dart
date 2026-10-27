@@ -64,7 +64,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         salary: double.parse(salaryController.text.trim()),
       );
 
-      // Save the employee through FastAPI to MySQL.
+      
       await employeeApiRepo.addEmployeeToApi(employee);
 
       if (!mounted) return;
@@ -76,7 +76,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         ),
       );
 
-      // Return to the previous screen and request a refresh.
+  
       Navigator.pop(context, true);
     } catch (error) {
       debugPrint('Failed to add employee: $error');
@@ -113,7 +113,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header section.
+         
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
@@ -170,7 +170,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Personal information.
+                 
                     const Row(
                       children: [
                         Icon(
@@ -245,7 +245,6 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
 
                     const SizedBox(height: 28),
 
-                    // Work information.
                     const Row(
                       children: [
                         Icon(
@@ -357,14 +356,13 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
 
                     const SizedBox(height: 28),
 
-                    // Save employee button.
                  CustomButton(
   text: isSaving ? 'Saving...' : 'Save Employee',
   onPressed: saveEmployee,
 ),
                     const SizedBox(height: 12),
 
-                    // Cancel button.
+            
                     SizedBox(
                       width: double.infinity,
                       height: 48,
