@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import '../model/employee_model.dart';
 
 class EmployeeApiRepo {
-  final String baseUrl = 'http://127.0.0.1:8000/employees';
+  final String baseUrl = 'http://172.16.20.88:8000/employees';
 
   // GET API
   Future<List<EmployeeModel>> getEmployeesFromApi() async {
