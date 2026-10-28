@@ -1,10 +1,24 @@
 
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = "mysql+pymysql://employee_app:EmpApp2026Secure%21@localhost:3306/employee_db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL)
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
+
+CA_CERT_PATH = os.path.join(os.path.dirname(__file__), "isrgrootx1.pem")
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={
+        "ssl": {
+            "ca": CA_CERT_PATH
+        }
+    }
+)
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -14,10 +28,10 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
+
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
