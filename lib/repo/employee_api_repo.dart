@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 import '../model/employee_model.dart';
 
 class EmployeeApiRepo {
-  final String baseUrl = 'http://172.16.20.88:8000/employees';
+ final String baseUrl =
+    'https://employee-management-system-backend-beryl.vercel.app/employees';
 
   // GET API
   Future<List<EmployeeModel>> getEmployeesFromApi() async {
