@@ -4,7 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AttendanceApiRepo {
-  static const String baseUrl = 'http://172.16.20.88:8000/attendance';
+  static const String baseUrl =
+    'https://employee-management-system-backend-beryl.vercel.app/attendance';
 
   Future<List<Map<String, dynamic>>> getAttendance(String date) async {
     final uri = Uri.parse(baseUrl).replace(
